@@ -29,7 +29,13 @@ export default function DiskWhatsApp() {
     const handleScroll = () => {
       const scrollPos = window.scrollY + window.innerHeight;
       const totalHeight = document.body.scrollHeight;
-      setActive(scrollPos >= totalHeight - 50); // Show at the final stretch
+      
+      // Ensure we've actually scrolled a significant amount (e.g., > 500px) 
+      // AND we are within the final stretch of the page.
+      const isAtEnd = scrollPos >= totalHeight - 20;
+      const hasScrolledSufficiently = window.scrollY > 500;
+      
+      setActive(isAtEnd && hasScrolledSufficiently);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
