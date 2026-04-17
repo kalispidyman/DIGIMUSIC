@@ -1,273 +1,280 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Play, Pause, Heart, Disc3 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Pause, Music } from 'lucide-react';
 
-const samples = [
-  {
-    id: 1, num: '01', title: 'Opus One',       genre: 'Symphonic · Cinematic', duration: '3:42', bpm: '72 BPM',
-    accent: '#5b8af0', chipBg: 'rgba(91,138,240,0.2)',  border: 'rgba(91,138,240,0.45)', solid: '#0a1228',
-    bars: [4,8,10,6,12,8,10,5,9,7,6,8,5,10],
-  },
-  {
-    id: 2, num: '02', title: 'Midnight Drive', genre: 'Electronic · Synth',    duration: '4:15', bpm: '128 BPM',
-    accent: '#9b63dd', chipBg: 'rgba(155,99,221,0.2)', border: 'rgba(155,99,221,0.45)', solid: '#0f0a1c',
-    bars: [8,10,7,9,10,12,8,10,6,9,8,10,7,11],
-  },
-  {
-    id: 3, num: '03', title: 'Golden Archive', genre: 'Acoustic · Jazz',       duration: '2:58', bpm: '88 BPM',
-    accent: '#d4961e', chipBg: 'rgba(212,150,30,0.2)',  border: 'rgba(212,150,30,0.45)', solid: '#160d00',
-    bars: [6,8,5,8,6,10,6,9,8,7,5,8,6,7],
-  },
-  {
-    id: 4, num: '04', title: 'Raw Frequency',  genre: 'Industrial · Bass',     duration: '3:30', bpm: '145 BPM',
-    accent: '#d45070', chipBg: 'rgba(212,80,112,0.2)',  border: 'rgba(212,80,112,0.45)', solid: '#180810',
-    bars: [10,7,12,8,10,5,10,8,7,10,8,6,12,5],
-  },
+/* ─── 12 keys — full octave C → B ────────────────────────── */
+const WHITE_KEYS = [
+  { id:1,  note:'C',  title:'Opus One',       genre:'Symphonic',    dur:'3:42', accent:'#7aaaf0' },
+  { id:2,  note:'D',  title:'Midnight Drive', genre:'Electronic',   dur:'4:15', accent:'#9b6fdd' },
+  { id:3,  note:'E',  title:'Velvet Thunder', genre:'R&B · Soul',   dur:'3:18', accent:'#e09878' },
+  { id:4,  note:'F',  title:'Neon Genesis',   genre:'Hip-Hop',      dur:'2:55', accent:'#50bcd4' },
+  { id:5,  note:'G',  title:'Golden Archive', genre:'Jazz',         dur:'2:58', accent:'#c8a030' },
+  { id:6,  note:'A',  title:'Crystal Rain',   genre:'Ambient',      dur:'5:10', accent:'#50c89a' },
+  { id:7,  note:'B',  title:'Aurora Bloom',   genre:'Orchestral',   dur:'4:44', accent:'#a870d0' },
 ];
 
-function Waveform({ bars, accent, isPlaying }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '2.5px', height: '28px' }}>
-      {bars.map((h, i) => (
-        <motion.div key={i}
-          animate={isPlaying ? { height: [`${h}px`, `${h * 2.6}px`, `${h}px`] } : { height: `${h * 0.8}px` }}
-          transition={{ repeat: Infinity, duration: 0.45 + i * 0.04, ease: 'easeInOut' }}
-          style={{ width: '3px', background: isPlaying ? accent : 'rgba(255,255,255,0.12)', borderRadius: '3px', minHeight: '3px', transition: 'background 0.4s' }}
-        />
-      ))}
-    </div>
-  );
-}
+const BLACK_KEYS = [
+  { id:8,  note:'C#', title:'Raw Frequency',  genre:'Industrial',   dur:'3:30', accent:'#e06070', posIdx:0 },
+  { id:9,  note:'D#', title:'Dark Matter',    genre:'Experimental', dur:'3:55', accent:'#6880e0', posIdx:1 },
+  { id:10, note:'F#', title:'Solar Wind',     genre:'Cinematic',    dur:'4:22', accent:'#e0a030', posIdx:2 },
+  { id:11, note:'G#', title:'Neon Pulse',     genre:'Synthwave',    dur:'3:10', accent:'#40d0b8', posIdx:3 },
+  { id:12, note:'A#', title:'Deep Echo',      genre:'Dub · Bass',   dur:'4:08', accent:'#9050c8', posIdx:4 },
+];
 
-// Vinyl cross-section accent panel (the round-side of each card)
-function VinylAccent({ accent, chipBg, isPlaying, trackNum }) {
-  return (
-    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '80px', flexShrink: 0 }}>
-      {/* Concentric groove rings */}
-      {[56, 44, 32, 20].map((r, i) => (
-        <div key={i} style={{ position: 'absolute', width: `${r}px`, height: `${r}px`, borderRadius: '50%', border: `1px solid ${isPlaying ? accent.replace(')', ', 0.35)').replace('rgb', 'rgba') : 'rgba(255,255,255,0.07)'}`, transition: 'border-color 0.5s' }} />
-      ))}
-      {/* Center disc */}
-      <motion.div
-        animate={isPlaying ? { rotate: 360 } : { rotate: 0 }}
-        transition={isPlaying ? { repeat: Infinity, duration: 4, ease: 'linear' } : { duration: 0.5 }}
-        style={{ width: '20px', height: '20px', borderRadius: '50%', background: isPlaying ? `radial-gradient(circle, ${accent}, ${chipBg.replace('0.2', '0.8')})` : 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: isPlaying ? `0 0 14px ${chipBg.replace('0.2', '0.9')}` : 'none', transition: 'all 0.4s ease' }}
-      >
-        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: isPlaying ? '#000' : 'rgba(255,255,255,0.2)' }} />
-      </motion.div>
-      {/* Track number watermark */}
-      <span style={{ position: 'absolute', bottom: '6px', fontSize: '0.55rem', fontFamily: "'DM Sans', sans-serif", fontWeight: 700, color: 'rgba(255,255,255,0.15)', letterSpacing: '0.1em' }}>
-        {trackNum}
-      </span>
-    </div>
-  );
-}
+/* Piano key clip-paths — notches where black keys sit */
+const WHITE_CLIPS = [
+  'polygon(0 0, 74% 0, 74% 42%, 100% 42%, 100% 100%, 0 100%)',                                           // C: right
+  'polygon(26% 0, 74% 0, 74% 42%, 100% 42%, 100% 100%, 0 100%, 0 42%, 26% 42%)',                         // D: both
+  'polygon(26% 0, 100% 0, 100% 100%, 0 100%, 0 42%, 26% 42%)',                                           // E: left
+  'polygon(0 0, 74% 0, 74% 42%, 100% 42%, 100% 100%, 0 100%)',                                           // F: right
+  'polygon(26% 0, 74% 0, 74% 42%, 100% 42%, 100% 100%, 0 100%, 0 42%, 26% 42%)',                         // G: both
+  'polygon(26% 0, 74% 0, 74% 42%, 100% 42%, 100% 100%, 0 100%, 0 42%, 26% 42%)',                         // A: both
+  'polygon(26% 0, 100% 0, 100% 100%, 0 100%, 0 42%, 26% 42%)',                                           // B: left
+];
 
-// LEFT card — rounded left edge, sharp right
-function LeftCard({ track, isPlaying, isHov, liked, onPlay, onLike, onHoverStart, onHoverEnd, index }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: -30 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.55, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-      onHoverStart={onHoverStart}
-      onHoverEnd={onHoverEnd}
-      whileHover={{ x: 6, scale: 1.02 }}
-      whileTap={{ scale: 0.97 }}
-      style={{
-        display: 'flex', alignItems: 'center',
-        background: track.solid,
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        // D-shape: huge radius on the LEFT side only
-        borderRadius: '90px 16px 16px 90px',
-        border: `1px solid ${isPlaying || isHov ? track.border.replace('0.45', '0.85') : track.border}`,
-        borderLeft: `2px solid ${isPlaying || isHov ? track.accent : track.border}`,
-        overflow: 'hidden',
-        boxShadow: isPlaying
-          ? `0 0 0 1px ${track.border}, 0 16px 40px ${track.chipBg.replace('0.2', '0.6')}, -8px 0 30px ${track.chipBg.replace('0.2', '0.4')}`
-          : isHov ? `0 8px 30px ${track.chipBg.replace('0.2', '0.4')}` : '0 4px 18px rgba(0,0,0,0.55)',
-        transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)',
-        position: 'relative',
-        cursor: 'pointer',
-        minHeight: '110px',
-      }}
-    >
-      {/* Glow on rounded left side */}
-      <div style={{ position: 'absolute', left: -20, top: '50%', transform: 'translateY(-50%)', width: '130px', height: '130px', background: `radial-gradient(circle, ${track.chipBg.replace('0.2', isHov || isPlaying ? '0.55' : '0.25')}, transparent 70%)`, pointerEvents: 'none', transition: 'all 0.4s ease' }} />
+/* Black key left-edge positions as % of key-bed width */
+const BK_LEFTS = [10.1, 24.2, 52.2, 66.3, 80.4];
+const BK_W = 8.6;
+const WK_H = 285;
+const BK_H = 168;
 
-      {/* Vinyl groove panel (left rounded section) */}
-      <div style={{ width: '88px', display: 'flex', alignItems: 'center', justifyContent: 'center', alignSelf: 'stretch', background: `linear-gradient(90deg, ${track.chipBg.replace('0.2', '0.35')}, transparent)`, flexShrink: 0 }}>
-        <VinylAccent accent={track.accent} chipBg={track.chipBg} isPlaying={isPlaying} trackNum={track.num} />
-      </div>
-
-      {/* Content */}
-      <div style={{ flex: 1, padding: '1rem 1.1rem 1rem 0.6rem', display: 'flex', flexDirection: 'column', gap: '0.7rem', zIndex: 1 }}>
-        {/* Title + like */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '6px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '0.96rem', fontFamily: "'Outfit', sans-serif", fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>{track.title}</span>
-              {isPlaying && <Disc3 size={12} color={track.accent} style={{ animation: 'spin 3s linear infinite' }} />}
-            </div>
-            <span style={{ fontSize: '0.63rem', fontFamily: "'DM Sans', sans-serif", color: 'rgba(255,255,255,0.38)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.09em' }}>{track.genre}</span>
-          </div>
-          <motion.div whileHover={{ scale: 1.2 }} onClick={e => { e.stopPropagation(); onLike(); }} style={{ cursor: 'pointer', paddingTop: '2px' }}>
-            <Heart size={14} color={liked ? track.accent : 'rgba(255,255,255,0.2)'} fill={liked ? track.accent : 'none'} strokeWidth={1.8} />
-          </motion.div>
-        </div>
-
-        {/* Controls row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
-          <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={e => { e.stopPropagation(); onPlay(); }}
-            style={{ width: '32px', height: '32px', borderRadius: '50%', background: isPlaying ? track.accent : track.chipBg, border: `1px solid ${track.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', outline: 'none', transition: 'all 0.3s', flexShrink: 0, boxShadow: isPlaying ? `0 4px 14px ${track.chipBg.replace('0.2', '0.7')}` : 'none' }}
-          >
-            {isPlaying ? <Pause size={12} color="#fff" fill="#fff" /> : <Play size={12} color={track.accent} fill={track.accent} style={{ marginLeft: '1px' }} />}
-          </motion.button>
-          <Waveform bars={track.bars} accent={track.accent} isPlaying={isPlaying} />
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px', flexShrink: 0 }}>
-            <span style={{ fontSize: '0.58rem', color: track.accent, background: track.chipBg, border: `1px solid ${track.border}`, padding: '1px 7px', borderRadius: '20px', fontFamily: "'DM Sans', sans-serif", fontWeight: 600 }}>{track.bpm}</span>
-            <span style={{ fontSize: '0.6rem', fontFamily: 'monospace', color: 'rgba(255,255,255,0.22)' }}>{track.duration}</span>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// RIGHT card — sharp left edge, rounded right
-function RightCard({ track, isPlaying, isHov, liked, onPlay, onLike, onHoverStart, onHoverEnd, index }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 30 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.55, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-      onHoverStart={onHoverStart}
-      onHoverEnd={onHoverEnd}
-      whileHover={{ x: -6, scale: 1.02 }}
-      whileTap={{ scale: 0.97 }}
-      style={{
-        display: 'flex', alignItems: 'center',
-        background: track.solid,
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        // D-shape: huge radius on the RIGHT side only
-        borderRadius: '16px 90px 90px 16px',
-        border: `1px solid ${isPlaying || isHov ? track.border.replace('0.45', '0.85') : track.border}`,
-        borderRight: `2px solid ${isPlaying || isHov ? track.accent : track.border}`,
-        overflow: 'hidden',
-        boxShadow: isPlaying
-          ? `0 0 0 1px ${track.border}, 0 16px 40px ${track.chipBg.replace('0.2', '0.6')}, 8px 0 30px ${track.chipBg.replace('0.2', '0.4')}`
-          : isHov ? `0 8px 30px ${track.chipBg.replace('0.2', '0.4')}` : '0 4px 18px rgba(0,0,0,0.55)',
-        transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)',
-        position: 'relative',
-        cursor: 'pointer',
-        minHeight: '110px',
-      }}
-    >
-      {/* Glow on rounded right side */}
-      <div style={{ position: 'absolute', right: -20, top: '50%', transform: 'translateY(-50%)', width: '130px', height: '130px', background: `radial-gradient(circle, ${track.chipBg.replace('0.2', isHov || isPlaying ? '0.55' : '0.25')}, transparent 70%)`, pointerEvents: 'none', transition: 'all 0.4s ease' }} />
-
-      {/* Content (left of the rounded side) */}
-      <div style={{ flex: 1, padding: '1rem 0.6rem 1rem 1.1rem', display: 'flex', flexDirection: 'column', gap: '0.7rem', zIndex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '6px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '0.96rem', fontFamily: "'Outfit', sans-serif", fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>{track.title}</span>
-              {isPlaying && <Disc3 size={12} color={track.accent} style={{ animation: 'spin 3s linear infinite' }} />}
-            </div>
-            <span style={{ fontSize: '0.63rem', fontFamily: "'DM Sans', sans-serif", color: 'rgba(255,255,255,0.38)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.09em' }}>{track.genre}</span>
-          </div>
-          <motion.div whileHover={{ scale: 1.2 }} onClick={e => { e.stopPropagation(); onLike(); }} style={{ cursor: 'pointer', paddingTop: '2px' }}>
-            <Heart size={14} color={liked ? track.accent : 'rgba(255,255,255,0.2)'} fill={liked ? track.accent : 'none'} strokeWidth={1.8} />
-          </motion.div>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
-          <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={e => { e.stopPropagation(); onPlay(); }}
-            style={{ width: '32px', height: '32px', borderRadius: '50%', background: isPlaying ? track.accent : track.chipBg, border: `1px solid ${track.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', outline: 'none', transition: 'all 0.3s', flexShrink: 0, boxShadow: isPlaying ? `0 4px 14px ${track.chipBg.replace('0.2', '0.7')}` : 'none' }}
-          >
-            {isPlaying ? <Pause size={12} color="#fff" fill="#fff" /> : <Play size={12} color={track.accent} fill={track.accent} style={{ marginLeft: '1px' }} />}
-          </motion.button>
-          <Waveform bars={track.bars} accent={track.accent} isPlaying={isPlaying} />
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px', flexShrink: 0 }}>
-            <span style={{ fontSize: '0.58rem', color: track.accent, background: track.chipBg, border: `1px solid ${track.border}`, padding: '1px 7px', borderRadius: '20px', fontFamily: "'DM Sans', sans-serif", fontWeight: 600 }}>{track.bpm}</span>
-            <span style={{ fontSize: '0.6rem', fontFamily: 'monospace', color: 'rgba(255,255,255,0.22)' }}>{track.duration}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Vinyl groove panel (right rounded section) */}
-      <div style={{ width: '88px', display: 'flex', alignItems: 'center', justifyContent: 'center', alignSelf: 'stretch', background: `linear-gradient(270deg, ${track.chipBg.replace('0.2', '0.35')}, transparent)`, flexShrink: 0 }}>
-        <VinylAccent accent={track.accent} chipBg={track.chipBg} isPlaying={isPlaying} trackNum={track.num} />
-      </div>
-    </motion.div>
-  );
-}
+const toRgb = h => `${parseInt(h.slice(1,3),16)},${parseInt(h.slice(3,5),16)},${parseInt(h.slice(5,7),16)}`;
 
 export default function SampleMusic() {
-  const [playingId, setPlayingId] = useState(null);
-  const [liked, setLiked] = useState({});
-  const [hovered, setHovered] = useState(null);
+  const [playId, setPlayId] = useState(null);
 
-  const leftTracks  = samples.slice(0, 2);
-  const rightTracks = samples.slice(2, 4);
+  const play = id => setPlayId(p => p === id ? null : id);
+
+  const allKeys    = [...WHITE_KEYS, ...BLACK_KEYS];
+  const activeKey  = allKeys.find(k => k.id === playId);
+  const activeRgb  = activeKey ? toRgb(activeKey.accent) : null;
 
   return (
-    <section style={{
-      height: '100vh', padding: '0 4vw',
-      display: 'flex', alignItems: 'center',
-      position: 'relative', gap: '2vw',
-    }}>
-      {/* LEFT column — D-shape cards (rounded left) */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.6rem', zIndex: 10 }}>
-        <div>
-          <p style={{ margin: 0, fontSize: '0.68rem', letterSpacing: '0.22em', color: 'rgba(255,255,255,0.38)', fontFamily: "'DM Sans', sans-serif", textTransform: 'uppercase', fontWeight: 500 }}>
-            03 — Work Samples
-          </p>
-          <h2 style={{ margin: '6px 0 0', fontFamily: "'Outfit', sans-serif", fontSize: 'clamp(1.4rem, 2vw, 1.9rem)', fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>
-            Listen to Our Work
-          </h2>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {leftTracks.map((track, i) => (
-            <LeftCard key={track.id} track={track} index={i}
-              isPlaying={playingId === track.id}
-              isHov={hovered === track.id}
-              liked={liked[track.id]}
-              onPlay={() => setPlayingId(playingId === track.id ? null : track.id)}
-              onLike={() => setLiked(p => ({ ...p, [track.id]: !p[track.id] }))}
-              onHoverStart={() => setHovered(track.id)}
-              onHoverEnd={() => setHovered(null)}
-            />
-          ))}
-        </div>
+    <section style={{ minHeight: '100vh', padding: '6vh 3vw 5vh', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+
+      {/* Header */}
+      <div style={{ alignSelf: 'flex-start', marginBottom: '2.2rem', paddingLeft: '0.5vw' }}>
+        <p style={{ margin: 0, fontSize: '0.62rem', letterSpacing: '0.28em', color: 'rgba(255,255,255,0.3)', fontFamily: "'DM Sans', sans-serif", textTransform: 'uppercase' }}>
+          03 — Concert Series
+        </p>
+        <h2 style={{ margin: '5px 0 0', fontFamily: "'Outfit', sans-serif", fontSize: 'clamp(1.3rem,1.9vw,1.9rem)', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>
+          Listen to Our Work
+        </h2>
       </div>
 
-      {/* CENTER gap — disk floats here */}
-      <div style={{ flex: '0 0 18%' }} />
+      {/* ══ Grand Piano Cabinet ══
+           Continuously pulses in the active key's accent while playing */}
+      <motion.div
+        animate={{
+          boxShadow: activeRgb
+            ? [
+                `0 40px 100px rgba(0,0,0,0.85), 0 0  10px rgba(${activeRgb},0.05)`,
+                `0 40px 100px rgba(0,0,0,0.85), 0 0  60px rgba(${activeRgb},0.4)`,
+                `0 40px 100px rgba(0,0,0,0.85), 0 0  10px rgba(${activeRgb},0.05)`,
+              ]
+            : '0 40px 100px rgba(0,0,0,0.85)',
+        }}
+        transition={activeRgb
+          ? { repeat: Infinity, duration: 1.6, ease: 'easeInOut' }
+          : { duration: 0.6 }}
+        style={{
+          width: '100%', maxWidth: '1340px',
+          background: 'linear-gradient(160deg, #111 0%, #080808 60%, #050505 100%)',
+          borderRadius: '16px 16px 6px 6px',
+          padding: '20px 20px 0',
+          border: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        {/* Brass lid rail */}
+        <div style={{ height: '10px', marginBottom: '16px', background: 'linear-gradient(90deg, rgba(180,140,60,0.06), rgba(200,160,80,0.2), rgba(180,140,60,0.06))', borderRadius: '5px', border: '1px solid rgba(200,160,80,0.14)' }} />
 
-      {/* RIGHT column — D-shape cards (rounded right) */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.6rem', zIndex: 10 }}>
-        <div style={{ height: '72px' }} /> {/* align with left column cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {rightTracks.map((track, i) => (
-            <RightCard key={track.id} track={track} index={i + 2}
-              isPlaying={playingId === track.id}
-              isHov={hovered === track.id}
-              liked={liked[track.id]}
-              onPlay={() => setPlayingId(playingId === track.id ? null : track.id)}
-              onLike={() => setLiked(p => ({ ...p, [track.id]: !p[track.id] }))}
-              onHoverStart={() => setHovered(track.id)}
-              onHoverEnd={() => setHovered(null)}
-            />
-          ))}
+        {/* ── Key bed ── */}
+        <div style={{ position: 'relative' }}>
+
+          {/* ── White keys ── */}
+          <div style={{ display: 'flex', gap: '2px', height: `${WK_H}px` }}>
+            {WHITE_KEYS.map((t, i) => {
+              const isPlaying = playId === t.id;
+              const r = toRgb(t.accent);
+              return (
+                <motion.div
+                  key={t.id}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: i * 0.06 }}
+                  whileTap={{ y: 7, transition: { duration: 0.07, ease: 'easeOut' } }}
+                  onClick={() => play(t.id)}
+                  /* Continuous pulse while this key is playing */
+                  animate={isPlaying ? {
+                    boxShadow: [
+                      `inset -1px 0 0 rgba(255,255,255,0.55), inset 0 -4px 0 rgba(0,0,0,0.2), 0 0 12px rgba(${r},0.3)`,
+                      `inset -1px 0 0 rgba(255,255,255,0.55), inset 0 -4px 0 rgba(0,0,0,0.2), 0 0 32px rgba(${r},0.75), 0 0 8px rgba(${r},0.4)`,
+                      `inset -1px 0 0 rgba(255,255,255,0.55), inset 0 -4px 0 rgba(0,0,0,0.2), 0 0 12px rgba(${r},0.3)`,
+                    ],
+                  } : {
+                    boxShadow: 'inset -1px 0 0 rgba(255,255,255,0.55), inset 1px 0 0 rgba(0,0,0,0.07), inset 0 -4px 0 rgba(0,0,0,0.22), 3px 5px 10px rgba(0,0,0,0.35)',
+                  }}
+                  style={{
+                    flex: 1,
+                    height: '100%',
+                    clipPath: WHITE_CLIPS[i],
+                    // True ivory — warm natural cream
+                    background: isPlaying
+                      ? `linear-gradient(180deg, #fffdf8 0%, rgba(${r},0.12) 50%, #ede5d8 100%)`
+                      : 'linear-gradient(180deg, #fffdf8 0%, #f5ede0 65%, #e8ddd0 100%)',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    borderLeft: '1px solid rgba(150,130,100,0.3)',
+                    borderRight: '1px solid rgba(100,80,60,0.2)',
+                    borderBottom: `3px solid ${isPlaying ? t.accent : 'rgba(100,80,60,0.45)'}`,
+                    borderRadius: '0 0 6px 6px',
+                    display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', paddingBottom: '14px',
+                    transition: 'background 0.35s, border-bottom-color 0.3s',
+                  }}
+                >
+                  {/* Left catch-light stripe */}
+                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', background: 'linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0.15))', pointerEvents: 'none' }} />
+
+                  {/* Pulsing radial glow overlay when playing */}
+                  <AnimatePresence>
+                    {isPlaying && (
+                      <motion.div
+                        key="glow"
+                        initial={{ opacity: 0 }} animate={{ opacity: [0.3, 0.9, 0.3] }} exit={{ opacity: 0 }}
+                        transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
+                        style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse at 50% 35%, rgba(${r},0.35), transparent 68%)`, pointerEvents: 'none' }}
+                      />
+                    )}
+                  </AnimatePresence>
+
+                  <div style={{ flex: 1 }} />
+
+                  {/* Content lower section */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px', padding: '0 4px' }}>
+                    {/* Title */}
+                    <span style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '0.83rem', color: isPlaying ? t.accent : '#2a2018', letterSpacing: '-0.01em', whiteSpace: 'nowrap', transition: 'color 0.3s' }}>
+                      {t.title}
+                    </span>
+                    {/* Play circle */}
+                    <motion.div
+                      animate={isPlaying ? { scale: [1, 1.18, 1] } : { scale: 1 }}
+                      transition={isPlaying ? { repeat: Infinity, duration: 1.6 } : {}}
+                      style={{ width: '30px', height: '30px', borderRadius: '50%', background: isPlaying ? t.accent : 'rgba(0,0,0,0.1)', border: `1.5px solid ${isPlaying ? t.accent : 'rgba(0,0,0,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: isPlaying ? `0 4px 14px rgba(${r},0.65)` : 'none', transition: 'background 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
+                      {isPlaying
+                        ? <Pause size={11} color="#fff" fill="#fff" />
+                        : <Play  size={11} color="rgba(0,0,0,0.4)" fill="rgba(0,0,0,0.4)" style={{ marginLeft: '1px' }} />}
+                    </motion.div>
+                    {/* Note name */}
+                    <span style={{ fontSize: '0.52rem', fontFamily: "'DM Sans', sans-serif", fontWeight: 700, color: 'rgba(0,0,0,0.2)', letterSpacing: '0.1em' }}>{t.note}</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* ── Black keys ── */}
+          {BLACK_KEYS.map((t, bi) => {
+            const isPlaying = playId === t.id;
+            const r = toRgb(t.accent);
+            return (
+              <motion.div
+                key={t.id}
+                initial={{ opacity: 0, y: -8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0.26 + bi * 0.07 }}
+                whileTap={{ y: 6, transition: { duration: 0.07, ease: 'easeOut' } }}
+                onClick={() => play(t.id)}
+                /* Continuous pulse on black key */
+                animate={isPlaying ? {
+                  boxShadow: [
+                    `3px 0 6px rgba(0,0,0,0.75), -3px 0 6px rgba(0,0,0,0.75), 0 16px 24px rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,255,255,0.1), 0 0 14px rgba(${r},0.4)`,
+                    `3px 0 6px rgba(0,0,0,0.75), -3px 0 6px rgba(0,0,0,0.75), 0 16px 24px rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,255,255,0.1), 0 0 40px rgba(${r},0.8)`,
+                    `3px 0 6px rgba(0,0,0,0.75), -3px 0 6px rgba(0,0,0,0.75), 0 16px 24px rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,255,255,0.1), 0 0 14px rgba(${r},0.4)`,
+                  ],
+                } : {
+                  boxShadow: '3px 0 6px rgba(0,0,0,0.75), -3px 0 6px rgba(0,0,0,0.75), 0 16px 24px rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,255,255,0.1)',
+                }}
+                transition={isPlaying ? { repeat: Infinity, duration: 1.6, ease: 'easeInOut' } : { duration: 0.4 }}
+                style={{
+                  position: 'absolute',
+                  left: `calc(${BK_LEFTS[bi]}% + 1px)`,
+                  top: 0, width: `${BK_W}%`, height: `${BK_H}px`,
+                  // Gloss ebony
+                  background: isPlaying
+                    ? `linear-gradient(180deg, #282828 0%, rgba(${r},0.35) 55%, #060606 100%)`
+                    : 'linear-gradient(180deg, #2c2c2c 0%, #161616 45%, #050505 100%)',
+                  borderRadius: '0 0 10px 10px',
+                  cursor: 'pointer', zIndex: 20, overflow: 'hidden',
+                  border: isPlaying ? `1px solid rgba(${r},0.5)` : '1px solid rgba(30,30,30,0.8)',
+                  borderTop: 'none',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'flex-end', padding: '0 3px 10px',
+                  transition: 'background 0.35s, border-color 0.3s',
+                }}
+              >
+                {/* Gloss sheen */}
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '38%', background: 'linear-gradient(to bottom, rgba(255,255,255,0.11), rgba(255,255,255,0.02))', pointerEvents: 'none' }} />
+                {/* High-gloss top edge pin */}
+                <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: '2px', background: 'rgba(255,255,255,0.18)', borderRadius: '0 0 2px 2px' }} />
+
+                {/* Pulsing glow while playing */}
+                <AnimatePresence>
+                  {isPlaying && (
+                    <motion.div key="bk-glow"
+                      initial={{ opacity: 0 }} animate={{ opacity: [0.2, 0.8, 0.2] }} exit={{ opacity: 0 }}
+                      transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
+                      style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse at 50% 40%, rgba(${r},0.4), transparent 70%)`, pointerEvents: 'none' }} />
+                  )}
+                </AnimatePresence>
+
+                {/* Play circle */}
+                <motion.div
+                  animate={isPlaying ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+                  transition={isPlaying ? { repeat: Infinity, duration: 1.6 } : {}}
+                  style={{ width: '22px', height: '22px', borderRadius: '50%', background: isPlaying ? t.accent : 'rgba(255,255,255,0.08)', border: `1px solid ${isPlaying ? t.accent : 'rgba(255,255,255,0.18)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: isPlaying ? `0 3px 10px rgba(${r},0.7)` : 'none', transition: 'background 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
+                  {isPlaying
+                    ? <Pause size={8} color="#fff" fill="#fff" />
+                    : <Play  size={8} color="rgba(255,255,255,0.45)" fill="rgba(255,255,255,0.45)" style={{ marginLeft: '1px' }} />}
+                </motion.div>
+                <span style={{ fontSize: '0.44rem', fontFamily: "'DM Sans', sans-serif", fontWeight: 700, color: isPlaying ? `rgba(${r},0.8)` : 'rgba(255,255,255,0.2)', letterSpacing: '0.08em', marginTop: '3px', transition: 'color 0.3s' }}>{t.note}</span>
+              </motion.div>
+            );
+          })}
         </div>
-      </div>
 
-      <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+        {/* Cabinet base */}
+        <div style={{ height: '18px', background: 'linear-gradient(to bottom, #0d0d0d, #060606)', borderTop: '1px solid rgba(200,160,80,0.1)' }} />
+      </motion.div>
+
+      {/* ── Track display panel ── */}
+      <motion.div style={{ width: '100%', maxWidth: '1340px', background: 'rgba(6,6,10,0.96)', border: '1px solid rgba(200,160,80,0.12)', borderTop: 'none', borderRadius: '0 0 12px 12px', padding: '12px 28px', display: 'flex', alignItems: 'center', gap: '18px', backdropFilter: 'blur(10px)' }}>
+        <motion.div
+          animate={activeRgb ? { scale: [1, 1.5, 1], boxShadow: [`0 0 4px rgba(${activeRgb},0.4)`, `0 0 12px rgba(${activeRgb},0.9)`, `0 0 4px rgba(${activeRgb},0.4)`] } : {}}
+          transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
+          style={{ width: '7px', height: '7px', borderRadius: '50%', background: activeKey ? activeKey.accent : 'rgba(200,160,80,0.3)', flexShrink: 0, transition: 'background 0.4s' }}
+        />
+        <AnimatePresence mode="wait">
+          {activeKey ? (
+            <motion.div key={activeKey.id} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1 }}>
+              <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '0.92rem', color: '#fff' }}>{activeKey.title}</span>
+              <span style={{ fontSize: '0.58rem', fontFamily: "'DM Sans', sans-serif", color: 'rgba(255,255,255,0.32)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{activeKey.genre}</span>
+              <span style={{ fontSize: '0.6rem', fontFamily: "'DM Sans', sans-serif", color: activeKey.accent }}>{activeKey.note} · {activeKey.dur}</span>
+            </motion.div>
+          ) : (
+            <motion.span key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.7rem', color: 'rgba(200,160,80,0.38)', letterSpacing: '0.18em', textTransform: 'uppercase', flex: 1 }}>
+              Press a key to play
+            </motion.span>
+          )}
+        </AnimatePresence>
+        <Music size={13} color="rgba(200,160,80,0.28)" />
+      </motion.div>
+
+      {/* Floor light slab */}
+      <div style={{ width: '60%', maxWidth: '800px', height: '16px', marginTop: '10px', background: activeRgb ? `radial-gradient(ellipse, rgba(${activeRgb},0.18), transparent 70%)` : 'radial-gradient(ellipse, rgba(200,160,80,0.08), transparent 70%)', filter: 'blur(14px)', borderRadius: '50%', pointerEvents: 'none', transition: 'background 0.5s' }} />
     </section>
   );
 }

@@ -119,62 +119,63 @@ export default function Hero() {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: '0 0 1rem 0', position: 'relative' }}>
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
-              animate={{
-                opacity: 1,
-                y: 0,
-                // Cycle the background gradient position when playing
-                backgroundPosition: isPlaying
-                  ? ['0% center', '200% center', '0% center']
-                  : '0% center',
-              }}
-              transition={{
-                opacity: { duration: 1.4, delay: 0.4, ease: [0.16, 1, 0.3, 1] },
-                y:       { duration: 1.4, delay: 0.4, ease: [0.16, 1, 0.3, 1] },
-                backgroundPosition: isPlaying
-                  ? { repeat: Infinity, duration: 2.8, ease: 'linear' }
-                  : { duration: 0.6 },
-              }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.4, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
               style={{
                 fontFamily: "'Outfit', sans-serif",
                 fontSize: 'clamp(4.5rem, 8vw, 8rem)',
-                fontWeight: 900,
-                lineHeight: 1,
-                margin: 0,
-                letterSpacing: '-0.04em',
-                textTransform: 'uppercase',
-                // When playing: sweep gradient; when paused: solid white
-                background: isPlaying
-                  ? 'linear-gradient(90deg, #ffffff 0%, #a78bfa 25%, #38bdf8 50%, #ffffff 75%, #a78bfa 100%)'
-                  : '#ffffff',
-                backgroundSize: isPlaying ? '200% auto' : 'auto',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                filter: isPlaying ? 'drop-shadow(0 0 18px rgba(167,139,250,0.45))' : 'none',
-                transition: 'filter 0.6s ease',
+                fontWeight: 900, lineHeight: 1, margin: 0,
+                letterSpacing: '-0.04em', textTransform: 'uppercase',
+                display: 'flex',
               }}
             >
-              Origin
+              {'ORIGIN'.split('').map((letter, i) => (
+                <span key={i} style={{
+                  // Each letter gets a different hue stop — creates spectrum cascade
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  backgroundImage: isPlaying
+                    ? `linear-gradient(160deg,
+                        hsl(${200 + i * 28}, 90%, 72%) 0%,
+                        hsl(${280 + i * 22}, 85%, 78%) 40%,
+                        hsl(${340 + i * 18}, 95%, 82%) 70%,
+                        hsl(${200 + i * 28}, 90%, 72%) 100%)`
+                    : 'linear-gradient(160deg, #d0cdc8, #fff, #b8b4b0)',
+                  backgroundSize: '300% 100%',
+                  animation: isPlaying
+                    ? `cascade 3s linear infinite`
+                    : 'none',
+                  animationDelay: `${i * -0.42}s`,
+                  filter: isPlaying
+                    ? `drop-shadow(0 0 8px hsla(${220 + i * 28},90%,70%,0.5))`
+                    : 'none',
+                  transition: 'filter 0.5s',
+                  display: 'inline-block',
+                }}>{letter}</span>
+              ))}
             </motion.h1>
+
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.4, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              style={{
-                fontFamily: "'Syncopate', sans-serif",
-                fontSize: 'clamp(2rem, 3.5vw, 3.5rem)',
-                fontWeight: 400,
-                lineHeight: 1.2,
-                margin: 0,
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-                color: '#bbbbbb',
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: '10px'
-              }}
+              style={{ fontFamily: "'Syncopate', sans-serif", fontSize: 'clamp(2rem, 3.5vw, 3.5rem)', fontWeight: 400, lineHeight: 1.2, margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase', display: 'flex', alignItems: 'baseline', gap: '10px' }}
             >
-              <span style={{ color: '#ffffff', fontWeight: 700 }}>Music</span>HUB
+              {/* Music — fast prismatic sweep, gives energy contrast to slow cascade above */}
+              <span style={{
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                backgroundImage: isPlaying
+                  ? 'linear-gradient(90deg, #f472b6, #a78bfa, #38bdf8, #34d399, #f472b6)'
+                  : 'linear-gradient(90deg, #fff, #fff)',
+                backgroundSize: '300% 100%',
+                animation: isPlaying ? 'cascade 2.2s linear infinite' : 'none',
+                fontWeight: 700,
+                filter: isPlaying ? 'drop-shadow(0 0 8px rgba(167,139,250,0.4))' : 'none',
+                transition: 'filter 0.5s',
+                display: 'inline-block',
+              }}>Music</span>
+              <span style={{ color: isPlaying ? 'rgba(167,139,250,0.4)' : '#666', transition: 'color 0.6s', fontWeight: 400 }}>HUB</span>
             </motion.h1>
           </div>
         </Influenced>
@@ -297,9 +298,14 @@ export default function Hero() {
       </motion.div>
 
       <style>{`
-        @keyframes liquidChrome {
-          0% { background-position: 0% center; }
-          100% { background-position: 200% center; }
+        /*
+         * cascade — sweeps the background-position left-to-right.
+         * Each letter has a different animationDelay so they hit
+         * different gradient stops at the same moment = chromatic cascade.
+         */
+        @keyframes cascade {
+          0%   { background-position: 100% 50%; }
+          100% { background-position:   0% 50%; }
         }
       `}</style>
     </section>

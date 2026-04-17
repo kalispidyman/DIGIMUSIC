@@ -21,15 +21,15 @@ const CONFIG = {
   grooveColorA: "#0f0f15",
   grooveColorB: "#16161d",
 
-  idleSpinSpeed: 0.05,
-  returnSpeed: 0.12,   // increased for tighter scroll sync
+  idleSpinSpeed: 0.08,
+  returnSpeed: 0.38,   // fast snap to scroll position
 
   // X, Y, Z, RotX, RotY
   pos_Hero: [2.4, 0.5, 1.1, 0.8, 0.4],
   pos_Tier1: [-2.5, 0.3, 1.8, 0.7, 0.3],
   pos_Tier2: [1.5, 0.4, 2.8, 0.6, 2.3],
-  pos_Sample: [-3.8, 0.0, 0.5, 0.4, 0.2],
-  pos_Bottom: [0, 0.2, 2.5, 0.8, -0.2], // Moved aside to prevent obscuring form
+  pos_Sample: [0.1, 0.0, 0.2, 0.5, 0.2],
+  pos_Bottom: [0, 0.2, 3.8, 0.5, -0.2], // Moved aside to prevent obscuring form
 };
 
 const drag = {
@@ -64,9 +64,9 @@ function useLabelTexture(side = 'A') {
 
     // ── 1. Deep black vinyl base ──
     const bgGrad = ctx.createRadialGradient(cx, cy, innerR, cx, cy, outerR);
-    bgGrad.addColorStop(0,   '#14141a');
+    bgGrad.addColorStop(0, '#14141a');
     bgGrad.addColorStop(0.5, '#0a0a0f');
-    bgGrad.addColorStop(1,   '#050508');
+    bgGrad.addColorStop(1, '#050508');
     ctx.fillStyle = bgGrad;
     ctx.beginPath();
     ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
@@ -86,10 +86,10 @@ function useLabelTexture(side = 'A') {
     const sheenX = cx + outerR * 0.25;
     const sheenY = cy - outerR * 0.3;
     const sheen = ctx.createRadialGradient(sheenX, sheenY, 10, sheenX, sheenY, outerR * 0.6);
-    sheen.addColorStop(0,   'rgba(200,180,255,0.08)');
+    sheen.addColorStop(0, 'rgba(200,180,255,0.08)');
     sheen.addColorStop(0.3, 'rgba(120,160,255,0.05)');
     sheen.addColorStop(0.6, 'rgba(80,220,200,0.03)');
-    sheen.addColorStop(1,   'rgba(0,0,0,0)');
+    sheen.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = sheen;
     ctx.beginPath();
     ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
@@ -99,7 +99,7 @@ function useLabelTexture(side = 'A') {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const ringMid = innerR + (outerR - innerR) * 0.48;
-    const originY  = cy - ringMid;
+    const originY = cy - ringMid;
 
     ctx.font = 'italic bold 90px Georgia, serif';
     ctx.fillStyle = '#ffffff';
@@ -124,14 +124,14 @@ function useLabelTexture(side = 'A') {
     // ── 5. Inner label circle ──
     const labelGrad = ctx.createRadialGradient(cx - 30, cy - 30, 10, cx, cy, innerR);
     if (side === 'A') {
-      labelGrad.addColorStop(0,    '#f8f8f8');
+      labelGrad.addColorStop(0, '#f8f8f8');
       labelGrad.addColorStop(0.55, '#e8e8e8');
       labelGrad.addColorStop(0.85, '#d5d5d5');
-      labelGrad.addColorStop(1,    '#bebebe');
+      labelGrad.addColorStop(1, '#bebebe');
     } else {
-      labelGrad.addColorStop(0,    '#242428');
+      labelGrad.addColorStop(0, '#242428');
       labelGrad.addColorStop(0.55, '#16161a');
-      labelGrad.addColorStop(1,    '#050508');
+      labelGrad.addColorStop(1, '#050508');
     }
     ctx.fillStyle = labelGrad;
     ctx.beginPath();
