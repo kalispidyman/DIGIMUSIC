@@ -1,46 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, User, MessageCircle, Mic, ArrowRight } from 'lucide-react';
+import { User, MessageCircle, Mic, ArrowRight } from 'lucide-react';
 
-/* ── CONFIG ── */
+/* ─────────────────────────────────────────────────────
+   FORM SIZE CONFIG — tweak these values:
+   W  →  form width in px
+   ───────────────────────────────────────────────── */
 const CONFIG = {
-  w: 750,    // Wide layout
-  y: 12,     // distance from bottom (vh)
+  w: 900,    // Significantly wider
   accent: '#25d366'
 };
 
-/**
- * DiskWhatsApp — A premium, studio-grade glassmorphic form.
- * Features: 
- * - Gradient-border scan animation
- * - Staggered entrance
- * - Minimalist audio-visualizer decoration
- * - Interactive focus states
- */
 export default function DiskWhatsApp() {
-  const [active, setActive] = useState(false);
   const [name, setName] = useState('');
   const [msg, setMsg] = useState('');
   const [sent, setSent] = useState(false);
   const [focused, setFocused] = useState(null);
-
-  // Absolute end of page trigger
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPos = window.scrollY + window.innerHeight;
-      const totalHeight = document.body.scrollHeight;
-      
-      // Ensure we've actually scrolled a significant amount (e.g., > 500px) 
-      // AND we are within the final stretch of the page.
-      const isAtEnd = scrollPos >= totalHeight - 20;
-      const hasScrolledSufficiently = window.scrollY > 500;
-      
-      setActive(isAtEnd && hasScrolledSufficiently);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const onSend = (e) => {
     e.preventDefault();
@@ -51,213 +26,160 @@ export default function DiskWhatsApp() {
   };
 
   return (
-    <AnimatePresence>
-      {active && (
+    <div style={{
+      width: '100%',
+      display: 'flex',
+      justifyContent: 'center',
+      padding: '4rem 0 2rem',
+      position: 'relative',
+      zIndex: 20
+    }}>
+      <motion.div
+        style={{
+          width: `${CONFIG.w}px`,
+          position: 'relative',
+          borderRadius: '24px',
+          overflow: 'hidden',
+          maxWidth: '92vw'
+        }}
+      >
+        {/* ── Main Content Container ── */}
         <div style={{
-          position: 'fixed',
-          bottom: `${CONFIG.y}vh`,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 999,
-          pointerEvents: 'none'
+          position: 'relative',
+          zIndex: 1,
+          background: '#07070c', // Purely opaque
+          backdropFilter: 'none',
+          borderRadius: '24px',
+          padding: '3rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2rem',
+          border: '1px solid rgba(255,255,255,0.06)',
+          boxShadow: '0 40px 100px rgba(0,0,0,0.8)'
         }}>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 40 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 30 }}
-            transition={{ type: 'spring', stiffness: 180, damping: 20 }}
-            style={{
-              width: `${CONFIG.w}px`,
-              pointerEvents: 'all',
-              position: 'relative',
-              borderRadius: '24px',
-              overflow: 'hidden',
-              padding: '1px' // For the gradient border
-            }}
-          >
-            {/* ── Animated Gradient Border ── */}
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-              style={{
-                position: 'absolute',
-                inset: '-100%',
-                background: `conic-gradient(from 0deg, transparent 60%, ${CONFIG.accent} 80%, transparent 100%)`,
-                zIndex: 0
-              }}
-            />
-
-            {/* ── Main Content Container ── */}
-            <div style={{
-              position: 'relative',
-              zIndex: 1,
-              background: 'rgba(5, 5, 8, 0.94)',
-              backdropFilter: 'blur(30px)',
-              borderRadius: '23px',
-              padding: '2.2rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1.8rem',
-              boxShadow: 'inset 0 0 40px rgba(0,0,0,0.8), 0 25px 60px rgba(0,0,0,0.8)'
-            }}>
-              
-              {/* Header: Brand & Audio Decoration */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{
-                    width: '45px', height: '45px', borderRadius: '12px',
-                    background: 'rgba(37, 211, 102, 0.1)',
-                    border: '1px solid rgba(37, 211, 102, 0.25)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                  }}>
-                    <Mic size={20} color={CONFIG.accent} />
-                  </div>
-                  <div>
-                    <h3 style={{ margin: 0, color: '#fff', fontSize: '1.1rem', fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>Get in Touch</h3>
-                    <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontFamily: "'DM Sans', sans-serif" }}>Ready to start your next masterpiece?</p>
-                  </div>
-                </div>
-
-                {/* Animated Waveform Decoration */}
-                <div style={{ display: 'flex', gap: '3px', alignItems: 'flex-end', height: '24px' }}>
-                  {[1,2,3,4,5,6].map(i => (
-                    <motion.div
-                      key={i}
-                      animate={{ height: ['4px', '22px', '8px', '24px', '6px'] }}
-                      transition={{ duration: 0.8 + (i*0.2), repeat: Infinity, ease: 'easeInOut' }}
-                      style={{ width: '3px', background: CONFIG.accent, borderRadius: '4px', opacity: 0.6 }}
-                    />
-                  ))}
-                </div>
+          
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{
+                width: '46px', height: '46px', borderRadius: '14px',
+                background: 'rgba(37, 211, 102, 0.06)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                <Mic size={20} color={CONFIG.accent} />
               </div>
-
-              <AnimatePresence mode="wait">
-                {sent ? (
-                  <motion.div
-                    key="success"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    style={{ textAlign: 'center', padding: '1rem 0' }}
-                  >
-                    <div style={{ color: CONFIG.accent, marginBottom: '0.8rem' }}><CheckCircle size={48} style={{ margin: '0 auto' }} /></div>
-                    <h4 style={{ color: '#fff', margin: '0 0 0.4rem', fontSize: '1.2rem' }}>Message Sent!</h4>
-                    <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0 }}>Opening WhatsApp to finalize...</p>
-                  </motion.div>
-                ) : (
-                  <motion.form
-                    key="form"
-                    onSubmit={onSend}
-                    style={{ display: 'flex', gap: '1.2rem', alignItems: 'flex-end' }}
-                  >
-                    {/* Name Field */}
-                    <div style={{ flex: 1, position: 'relative' }}>
-                      <label style={{ 
-                        display: 'block', fontSize: '0.65rem', textTransform: 'uppercase', 
-                        letterSpacing: '0.1em', color: focused === 'name' ? CONFIG.accent : 'rgba(255,255,255,0.3)',
-                        marginBottom: '8px', transition: 'color 0.3s' 
-                      }}>Artist / Client Name</label>
-                      <div style={{ position: 'relative' }}>
-                        <User size={16} color="rgba(255,255,255,0.2)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
-                        <input
-                          type="text"
-                          required
-                          value={name}
-                          onChange={e => setName(e.target.value)}
-                          onFocus={() => setFocused('name')}
-                          onBlur={() => setFocused(null)}
-                          placeholder="Your identity..."
-                          style={{
-                            width: '100%',
-                            background: 'rgba(255,255,255,0.03)',
-                            border: `1px solid ${focused === 'name' ? CONFIG.accent : 'rgba(255,255,255,0.08)'}`,
-                            borderRadius: '12px',
-                            padding: '14px 14px 14px 45px',
-                            color: '#fff',
-                            fontSize: '0.9rem',
-                            outline: 'none',
-                            transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Message Field */}
-                    <div style={{ flex: 2, position: 'relative' }}>
-                      <label style={{ 
-                        display: 'block', fontSize: '0.65rem', textTransform: 'uppercase', 
-                        letterSpacing: '0.1em', color: focused === 'msg' ? CONFIG.accent : 'rgba(255,255,255,0.3)',
-                        marginBottom: '8px', transition: 'color 0.3s' 
-                      }}>The Vibe / Project Idea</label>
-                      <div style={{ position: 'relative' }}>
-                        <MessageCircle size={16} color="rgba(255,255,255,0.2)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
-                        <input
-                          type="text"
-                          required
-                          value={msg}
-                          onChange={e => setMsg(e.target.value)}
-                          onFocus={() => setFocused('msg')}
-                          onBlur={() => setFocused(null)}
-                          placeholder="Tell us about the project..."
-                          style={{
-                            width: '100%',
-                            background: 'rgba(255,255,255,0.03)',
-                            border: `1px solid ${focused === 'msg' ? CONFIG.accent : 'rgba(255,255,255,0.08)'}`,
-                            borderRadius: '12px',
-                            padding: '14px 14px 14px 45px',
-                            color: '#fff',
-                            fontSize: '0.9rem',
-                            outline: 'none',
-                            transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Dynamic Submit Button */}
-                    <motion.button
-                      whileHover={{ scale: 1.05, background: CONFIG.accent, color: '#000' }}
-                      whileTap={{ scale: 0.95 }}
-                      type="submit"
-                      style={{
-                        height: '52px',
-                        padding: '0 2rem',
-                        borderRadius: '12px',
-                        border: `1px solid ${CONFIG.accent}`,
-                        background: 'transparent',
-                        color: CONFIG.accent,
-                        fontSize: '0.9rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        transition: 'all 0.3s ease',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      Connect <ArrowRight size={18} />
-                    </motion.button>
-                  </motion.form>
-                )}
-              </AnimatePresence>
-
+              <div>
+                <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>Direct Connection</h3>
+                <p style={{ margin: 0, color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', fontFamily: "'DM Sans', sans-serif" }}>Send a message to start your project</p>
+              </div>
             </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
-  );
-}
 
-function CheckCircle({ size, style }) {
-  return (
-    <svg 
-      width={size} height={size} viewBox="0 0 24 24" fill="none" 
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" 
-      strokeLinejoin="round" style={style}
-    >
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <polyline points="22 4 12 14.01 9 11.01" />
-    </svg>
+            {/* Visualizer Decoration */}
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'flex-end', height: '22px' }}>
+              {[1,2,3,4,5,6].map(i => (
+                <motion.div
+                  key={i}
+                  animate={{ height: ['4px', '20px', '8px', '22px', '4px'] }}
+                  transition={{ duration: 0.7 + (i*0.12), repeat: Infinity, ease: 'easeInOut' }}
+                  style={{ width: '3px', background: CONFIG.accent, borderRadius: '4px', opacity: 0.4 }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {sent ? (
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{ textAlign: 'center', padding: '1.5rem 0' }}
+              >
+                <h4 style={{ color: CONFIG.accent, margin: '0 0 0.5rem', fontSize: '1.2rem' }}>Message Sent!</h4>
+                <p style={{ color: 'rgba(255,255,255,0.4)', margin: 0, fontSize: '0.85rem' }}>Redirecting to WhatsApp...</p>
+              </motion.div>
+            ) : (
+              <motion.form
+                key="form"
+                onSubmit={onSend}
+                style={{ display: 'flex', gap: '1.2rem', alignItems: 'flex-end' }}
+              >
+                {/* Name */}
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Identity</label>
+                  <div style={{ position: 'relative' }}>
+                    <User size={15} color="rgba(255,255,255,0.15)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
+                    <input
+                      type="text" required value={name} onChange={e => setName(e.target.value)}
+                      onFocus={() => setFocused('name')} onBlur={() => setFocused(null)}
+                      placeholder="Your identity"
+                      style={{
+                        width: '100%',
+                        background: 'rgba(255,255,255,0.04)',
+                        border: `1px solid ${focused === 'name' ? 'rgba(37,211,102,0.42)' : 'rgba(255,255,255,0.08)'}`,
+                        borderRadius: '15px',
+                        padding: '16px 16px 16px 50px',
+                        color: '#fff',
+                        fontSize: '1rem',
+                        outline: 'none',
+                        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Message */}
+                <div style={{ flex: 2 }}>
+                  <label style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Your Vibe</label>
+                  <div style={{ position: 'relative' }}>
+                    <MessageCircle size={15} color="rgba(255,255,255,0.15)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
+                    <input
+                      type="text" required value={msg} onChange={e => setMsg(e.target.value)}
+                      onFocus={() => setFocused('msg')} onBlur={() => setFocused(null)}
+                      placeholder="Tell us about the project..."
+                      style={{
+                        width: '100%',
+                        background: 'rgba(255,255,255,0.04)',
+                        border: `1px solid ${focused === 'msg' ? 'rgba(37,211,102,0.42)' : 'rgba(255,255,255,0.08)'}`,
+                        borderRadius: '15px',
+                        padding: '16px 16px 16px 50px',
+                        color: '#fff',
+                        fontSize: '1rem',
+                        outline: 'none',
+                        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Submit */}
+                <motion.button
+                  whileHover={{ scale: 1.05, background: CONFIG.accent, color: '#000' }}
+                  whileTap={{ scale: 0.95 }}
+                  type="submit"
+                  style={{
+                    height: '56px',
+                    padding: '0 2.5rem',
+                    borderRadius: '15px',
+                    border: `1px solid ${CONFIG.accent}`,
+                    background: 'transparent',
+                    color: CONFIG.accent,
+                    fontSize: '1rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}
+                >
+                  Connect <ArrowRight size={18} />
+                </motion.button>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
+    </div>
   );
 }

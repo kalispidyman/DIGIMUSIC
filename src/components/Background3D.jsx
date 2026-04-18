@@ -29,7 +29,7 @@ const CONFIG = {
   pos_Tier1: [-2.5, 0.3, 1.8, 0.7, 0.3],
   pos_Tier2: [1.5, 0.4, 2.8, 0.6, 2.3],
   pos_Sample: [0.1, 0.0, 0.2, 0.5, 0.2],
-  pos_Bottom: [0, 0.2, 3.8, 0.5, -0.2], // Moved aside to prevent obscuring form
+  pos_Bottom: [0, 0.2, 4.5, 0.5, -0.2], // Moved aside to prevent obscuring form
 };
 
 const drag = {
@@ -200,6 +200,16 @@ function useLabelTexture(side = 'A') {
     texture.needsUpdate = true;
     return texture;
   }, [side]);
+
+  // VRAM Cleanup: Dispose of the massive texture when the hook unmounts! 
+  // This prevents memory leaks outlined in the performance guide.
+  useEffect(() => {
+    return () => {
+      if (texture) texture.dispose();
+    };
+  }, [texture]);
+
+  return texture;
 }
 
 function VinylRecord() {
@@ -211,6 +221,11 @@ function VinylRecord() {
   const labelTextureA = useLabelTexture('A');
   const labelTextureB = useLabelTexture('B');
   const colorObj = useMemo(() => new THREE.Color(), []);
+
+  // WebGL Performance: Memoize the 60 groove materials into 2 shared instances. 
+  // This reduces WebGL state changes and overhead significantly.
+  const grooveMatA = useMemo(() => new THREE.MeshStandardMaterial({ color: CONFIG.grooveColorA, roughness: 0.2, metalness: 0.9, side: THREE.FrontSide }), []);
+  const grooveMatB = useMemo(() => new THREE.MeshStandardMaterial({ color: CONFIG.grooveColorB, roughness: 0.2, metalness: 0.9, side: THREE.FrontSide }), []);
 
   useFrame((state) => {
     if (!group.current) return;
@@ -338,14 +353,8 @@ function VinylRecord() {
         {Array.from({ length: 30 }, (_, i) => {
           const rad = CONFIG.grooveInner + i * grooveStep;
           return (
-            <mesh key={`t${i}`} position={[0, halfT + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <mesh key={`t${i}`} position={[0, halfT + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]} material={i % 2 === 0 ? grooveMatA : grooveMatB}>
               <ringGeometry args={[rad, rad + grooveStep * 0.5, 128]} />
-              <meshStandardMaterial
-                color={i % 2 === 0 ? CONFIG.grooveColorA : CONFIG.grooveColorB}
-                roughness={0.2}
-                metalness={0.9}
-                side={THREE.FrontSide}
-              />
             </mesh>
           );
         })}
@@ -354,14 +363,8 @@ function VinylRecord() {
         {Array.from({ length: 30 }, (_, i) => {
           const rad = CONFIG.grooveInner + i * grooveStep;
           return (
-            <mesh key={`b${i}`} position={[0, -halfT - 0.001, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <mesh key={`b${i}`} position={[0, -halfT - 0.001, 0]} rotation={[Math.PI / 2, 0, 0]} material={i % 2 === 0 ? grooveMatA : grooveMatB}>
               <ringGeometry args={[rad, rad + grooveStep * 0.5, 128]} />
-              <meshStandardMaterial
-                color={i % 2 === 0 ? CONFIG.grooveColorA : CONFIG.grooveColorB}
-                roughness={0.25}
-                metalness={0.9}
-                side={THREE.FrontSide}
-              />
             </mesh>
           );
         })}
@@ -440,7 +443,11 @@ export default function Background3D() {
   }, []);
 
   return (
-    <Canvas camera={{ position: [0, 0, 7], fov: 50 }} gl={{ antialias: true }}>
+    <Canvas 
+      camera={{ position: [0, 0, 7], fov: 50 }} 
+      gl={{ antialias: true }} 
+      dpr={[1, 2]} /* Crucial optimization: Clamp pixel ratio to prevent lag on 4K/Mobile */
+    >
       <ambientLight intensity={2.5} />
 
       {/* Front & Top Lighting */}
