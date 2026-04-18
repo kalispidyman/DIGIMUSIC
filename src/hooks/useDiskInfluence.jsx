@@ -41,6 +41,7 @@ export function useDiskInfluence(options = {}) {
 
   const ref = useRef(null);
   const state = useRef({ x: 0, y: 0, scale: 1, rot: 0 });
+  const cachedRect = useRef({ absoluteCX: 0, absoluteCY: 0, radius: 0 });
   const rafId = useRef(null);
   const isFirstFrame = useRef(true);
 
@@ -50,24 +51,41 @@ export function useDiskInfluence(options = {}) {
 
     // GPU compositing hint
     el.style.willChange = 'transform';
+    
+    // PERFORMANCE FIX: Cache absolute document coordinates to prevent Layout Thrashing.
+    // Querying getBoundingClientRect() 60fps causes severe scroll jitter.
+    const updateCache = () => {
+      const currentTransform = el.style.transform;
+      el.style.transform = 'none'; // Temporarily clear transform to get true box
+      
+      const rect = el.getBoundingClientRect();
+      cachedRect.current = {
+        absoluteCX: rect.left + window.scrollX + rect.width * 0.5,
+        absoluteCY: rect.top + window.scrollY + rect.height * 0.5,
+        radius: Math.max(rect.width, rect.height) * 0.3
+      };
+      
+      el.style.transform = currentTransform; // Restore instantly
+    };
+
+    updateCache();
+    window.addEventListener('resize', updateCache, { passive: true });
 
     const tick = () => {
       // Guard against unmounted elements
       if (!el || !el.isConnected) return;
 
-      // Get element center in viewport coordinates
-      const rect = el.getBoundingClientRect();
-      const elCX = rect.left + rect.width * 0.5;
-      const elCY = rect.top + rect.height * 0.5;
+      // Calculate current viewport position using cached absolute + scroll (Zero Layout Thrashing!)
+      const elCX = cachedRect.current.absoluteCX - window.scrollX;
+      const elCY = cachedRect.current.absoluteCY - window.scrollY;
 
       // Vector from disk center to element center
       const dx = elCX - diskState.x;
       const dy = elCY - diskState.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      // Factor in element's own size — larger elements should react
-      // when the disk reaches their edge, not just their center
-      const elRadius = Math.max(rect.width, rect.height) * 0.3;
+      // Factor in element's own size from cache
+      const elRadius = cachedRect.current.radius;
       const effectiveDist = Math.max(0, dist - elRadius);
 
       let targetX = 0;
@@ -138,6 +156,7 @@ export function useDiskInfluence(options = {}) {
     rafId.current = requestAnimationFrame(tick);
 
     return () => {
+      window.removeEventListener('resize', updateCache);
       if (rafId.current) cancelAnimationFrame(rafId.current);
       if (el) {
         el.style.transform = '';
