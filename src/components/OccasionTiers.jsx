@@ -33,16 +33,16 @@ export default function OccasionTiers() {
   const [hovered, setHovered] = useState(null);
 
   return (
-    <section style={{
+    <section className="responsive-tier-section" style={{
       height: '100vh', padding: '0 5vw',
       display: 'flex', alignItems: 'center',
       position: 'relative', gap: '5vw',
     }}>
       {/* LEFT SPACER — disk lives here */}
-      <div style={{ flex: '0 0 46%' }} />
+      <div className="tier-spacer" style={{ flex: '0 0 46%' }} />
 
       {/* RIGHT — cards */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.6rem', zIndex: 10 }}>
+      <div className="responsive-tier-cards" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.6rem', zIndex: 10 }}>
         {/* Section label */}
         <div>
           <p style={{ margin: 0, fontSize: '0.68rem', letterSpacing: '0.22em', color: 'rgba(255,255,255,0.38)', fontFamily: "'DM Sans', sans-serif", textTransform: 'uppercase', fontWeight: 500 }}>
@@ -61,27 +61,21 @@ export default function OccasionTiers() {
             return (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, x: -24 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                className="tier-card"
+                initial={{ opacity: 0, scale: 0.8, y: 30 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ type: "spring", stiffness: 120, damping: 14, delay: i * 0.1 }}
                 onHoverStart={() => setHovered(i)}
                 onHoverEnd={() => setHovered(null)}
                 whileHover={{ y: -6, x: 4 }}
                 whileTap={{ scale: 0.97 }}
                 style={{
-                  background: occ.solid,
-                  backdropFilter: 'blur(24px)',
-                  WebkitBackdropFilter: 'blur(24px)',
                   border: `1px solid ${isHov ? occ.border.replace('0.4', '0.8') : occ.border}`,
                   borderLeft: `3px solid ${isHov ? occ.accent : occ.border}`,
                   borderRadius: '16px',
-                  padding: '1.4rem 1.3rem',
                   cursor: 'pointer',
-                  boxShadow: isHov
-                    ? `0 0 0 1px ${occ.border}, 0 16px 40px ${occ.chipBg.replace('0.18', '0.55')}`
-                    : '0 4px 20px rgba(0,0,0,0.5)',
-                  transition: 'box-shadow 0.35s ease, border 0.3s ease',
+                  transition: 'border 0.3s ease',
                   display: 'flex', flexDirection: 'column', gap: '1rem',
                   position: 'relative', overflow: 'hidden',
                 }}
@@ -92,10 +86,10 @@ export default function OccasionTiers() {
                 {/* Icon + title + chevron */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '11px', background: occ.chipBg, border: `1px solid ${occ.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div className="tier-icon" style={{ width: '40px', height: '40px', borderRadius: '11px', background: occ.chipBg, border: `1px solid ${occ.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <Icon size={18} color={occ.accent} strokeWidth={2} />
                     </div>
-                    <span style={{ fontSize: '1rem', fontFamily: "'Outfit', sans-serif", fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>
+                    <span className="tier-title" style={{ fontSize: '1rem', fontFamily: "'Outfit', sans-serif", fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>
                       {occ.category}
                     </span>
                   </div>

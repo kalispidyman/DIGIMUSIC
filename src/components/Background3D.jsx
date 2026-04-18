@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useMemo, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment } from '@react-three/drei';
 import * as THREE from 'three';
@@ -30,6 +30,14 @@ const CONFIG = {
   pos_Tier2: [1.5, 0.4, 2.8, 0.6, 2.3],
   pos_Sample: [0.1, 0.0, 0.2, 0.5, 0.2],
   pos_Bottom: [0, 0.2, 4.5, 0.5, -0.2], // Moved aside to prevent obscuring form
+};
+
+const M_CONFIG = {
+  pos_Hero: [1.0, 1.3, -1.0, 0.8, 0.2],    // Pulled back and slightly tighter to center
+  pos_Tier1: [-1.0, -1.0, -1.0, 0.7, 0.3], // Retains corner dodging but physically smaller
+  pos_Tier2: [1.0, 1.5, -1.0, 0.6, 1.3],
+  pos_Sample: [0, 2.0, -1.0, 0.5, 0.2],
+  pos_Bottom: [1.0, 1.0, -1.0, 0.5, -0.2],
 };
 
 const drag = {
@@ -222,6 +230,13 @@ function VinylRecord() {
   const labelTextureB = useLabelTexture('B');
   const colorObj = useMemo(() => new THREE.Color(), []);
 
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // WebGL Performance: Memoize the 60 groove materials into 2 shared instances. 
   // This reduces WebGL state changes and overhead significantly.
   const grooveMatA = useMemo(() => new THREE.MeshStandardMaterial({ color: CONFIG.grooveColorA, roughness: 0.2, metalness: 0.9, side: THREE.FrontSide }), []);
@@ -230,7 +245,11 @@ function VinylRecord() {
   useFrame((state) => {
     if (!group.current) return;
 
-    // Read scroll directly — no lerp to avoid compounding delay with Lenis
+    // Layout Thrashing Fix: Max scroll is cached via global resize listener.
+    // Reading `document.body.scrollHeight` in `useFrame` directly caused intense 60FPS lag!
+    const activeMaxScroll = window._cachedMaxScroll || Math.max(1, document.body.scrollHeight - window.innerHeight);
+    const activeIsMobile = window._cachedIsMobile !== undefined ? window._cachedIsMobile : window.innerWidth < 768;
+
     scrollRef.current = window.scrollY;
     const scroll = scrollRef.current;
 
@@ -258,22 +277,20 @@ function VinylRecord() {
       glowRef.current.material.opacity = pulse;
     }
 
-    const maxScroll = Math.max(1, document.body.scrollHeight - window.innerHeight);
-    const progress = Math.max(0, Math.min(1, scroll / maxScroll));
+    const progress = Math.max(0, Math.min(1, scroll / activeMaxScroll));
     const r = progress * 4;
 
-    const isMobile = window.innerWidth < 768;
+    const cfg = activeIsMobile ? M_CONFIG : CONFIG;
     let kf;
-    if (isMobile) {
-      kf = [0, 0, -3, 0.6, 0];
-    } else if (r <= 1) {
-      kf = lerpKF(CONFIG.pos_Hero, CONFIG.pos_Tier1, r);
+
+    if (r <= 1) {
+      kf = lerpKF(cfg.pos_Hero, cfg.pos_Tier1, r);
     } else if (r <= 2) {
-      kf = lerpKF(CONFIG.pos_Tier1, CONFIG.pos_Tier2, r - 1);
+      kf = lerpKF(cfg.pos_Tier1, cfg.pos_Tier2, r - 1);
     } else if (r <= 3) {
-      kf = lerpKF(CONFIG.pos_Tier2, CONFIG.pos_Sample, r - 2);
+      kf = lerpKF(cfg.pos_Tier2, cfg.pos_Sample, r - 2);
     } else {
-      kf = lerpKF(CONFIG.pos_Sample, CONFIG.pos_Bottom, r - 3);
+      kf = lerpKF(cfg.pos_Sample, cfg.pos_Bottom, r - 3);
     }
 
     const bob = Math.sin(time * 0.8) * 0.12; // Natural slow bob
@@ -287,11 +304,15 @@ function VinylRecord() {
       group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, 0.2, 0.1);
       group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, drag.mx * 0.5, 0.1);
     } else {
-      group.current.position.x = THREE.MathUtils.lerp(group.current.position.x, kf[0], CONFIG.returnSpeed);
-      group.current.position.y = THREE.MathUtils.lerp(group.current.position.y, kf[1] + bob, CONFIG.returnSpeed);
-      group.current.position.z = THREE.MathUtils.lerp(group.current.position.z, kf[2], CONFIG.returnSpeed);
-      group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, kf[3], CONFIG.returnSpeed);
-      group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, kf[4], CONFIG.returnSpeed);
+      // 🚀 MOBILE PHYSICS: 
+      // A slight lerp (0.25) acts as a low-pass filter over the asynchronous compositor thread jumps, 
+      // drastically reducing the visible rubber-band stutter without causing too much trailing lag.
+      const spd = activeIsMobile ? 0.25 : CONFIG.returnSpeed;
+      group.current.position.x = THREE.MathUtils.lerp(group.current.position.x, kf[0], spd);
+      group.current.position.y = THREE.MathUtils.lerp(group.current.position.y, kf[1] + bob, spd);
+      group.current.position.z = THREE.MathUtils.lerp(group.current.position.z, kf[2], spd);
+      group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, kf[3], spd);
+      group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, kf[4], spd);
     }
 
     screenPos.current.setFromMatrixPosition(group.current.matrixWorld);
@@ -350,7 +371,7 @@ function VinylRecord() {
         </mesh>
 
         {/* Top Grooves */}
-        {Array.from({ length: 30 }, (_, i) => {
+        {!isMobile && Array.from({ length: 30 }, (_, i) => {
           const rad = CONFIG.grooveInner + i * grooveStep;
           return (
             <mesh key={`t${i}`} position={[0, halfT + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]} material={i % 2 === 0 ? grooveMatA : grooveMatB}>
@@ -360,7 +381,7 @@ function VinylRecord() {
         })}
 
         {/* Bottom Grooves */}
-        {Array.from({ length: 30 }, (_, i) => {
+        {!isMobile && Array.from({ length: 30 }, (_, i) => {
           const rad = CONFIG.grooveInner + i * grooveStep;
           return (
             <mesh key={`b${i}`} position={[0, -halfT - 0.001, 0]} rotation={[Math.PI / 2, 0, 0]} material={i % 2 === 0 ? grooveMatA : grooveMatB}>
@@ -435,18 +456,27 @@ export default function Background3D() {
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
 
+    // Severe Layout Thrashing Fix: Cache the DOM height globally
+    const updateCache = () => {
+      window._cachedMaxScroll = Math.max(1, document.body.scrollHeight - window.innerHeight);
+      window._cachedIsMobile = window.innerWidth < 768;
+    };
+    window.addEventListener('resize', updateCache);
+    updateCache(); // run immediately
+
     return () => {
       window.removeEventListener('mousedown', onDown);
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('resize', updateCache);
     };
   }, []);
 
   return (
-    <Canvas 
-      camera={{ position: [0, 0, 7], fov: 50 }} 
-      gl={{ antialias: true }} 
-      dpr={[1, 2]} /* Crucial optimization: Clamp pixel ratio to prevent lag on 4K/Mobile */
+    <Canvas
+      camera={{ position: [0, 0, 7], fov: 50 }}
+      gl={{ antialias: false, powerPreference: "high-performance" }}
+      dpr={typeof window !== 'undefined' ? [1, window.innerWidth < 768 ? 1.0 : 1.5] : [1, 1]} /* Lock mobile DPR to 1 to permanently stop GPU throttling */
     >
       <ambientLight intensity={2.5} />
 

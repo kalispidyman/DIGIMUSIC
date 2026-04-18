@@ -44,7 +44,7 @@ export default function DiskWhatsApp() {
         }}
       >
         {/* ── Main Content Container ── */}
-        <div style={{
+        <div className="wa-form-container" style={{
           position: 'relative',
           zIndex: 1,
           background: '#07070c', // Purely opaque
@@ -59,7 +59,7 @@ export default function DiskWhatsApp() {
         }}>
           
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="wa-form-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <div style={{
                 width: '46px', height: '46px', borderRadius: '14px',
@@ -101,6 +101,7 @@ export default function DiskWhatsApp() {
             ) : (
               <motion.form
                 key="form"
+                className="wa-form-row"
                 onSubmit={onSend}
                 style={{ display: 'flex', gap: '1.2rem', alignItems: 'flex-end' }}
               >
@@ -154,6 +155,7 @@ export default function DiskWhatsApp() {
 
                 {/* Submit */}
                 <motion.button
+                  className="wa-form-button"
                   whileHover={{ scale: 1.05, background: CONFIG.accent, color: '#000' }}
                   whileTap={{ scale: 0.95 }}
                   type="submit"

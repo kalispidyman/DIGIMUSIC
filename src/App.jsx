@@ -96,12 +96,12 @@ function DesignerBadge() {
         onTap={blast}
         animate={{
           scale: hov ? 1.05 : 1,
-          y: hov ? -4 : [0, -6, 0], 
-          boxShadow: hov 
-            ? '0 0 35px rgba(167,139,250,0.3)' 
+          y: hov ? -4 : [0, -6, 0],
+          boxShadow: hov
+            ? '0 0 35px rgba(167,139,250,0.3)'
             : '0 0 0px rgba(0,0,0,0)',
         }}
-        transition={{ 
+        transition={{
           y: hov ? { type: 'spring', stiffness: 300 } : { repeat: Infinity, duration: 4, ease: 'easeInOut' },
           scale: { type: 'spring', stiffness: 400, damping: 25 },
           boxShadow: { duration: 0.3 }
@@ -123,10 +123,10 @@ function DesignerBadge() {
         <motion.div
           animate={hov ? { x: ['-150%', '150%'] } : { x: '-150%' }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          style={{ 
-            position: 'absolute', inset: 0, 
+          style={{
+            position: 'absolute', inset: 0,
             background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
-            pointerEvents: 'none' 
+            pointerEvents: 'none'
           }}
         />
 
@@ -221,8 +221,8 @@ function App() {
 
             {/* ── Layer 10: All scrollable content with scroll highlights ── */}
             <motion.main
-              initial={{ opacity: 0, filter: 'blur(6px)' }}
-              animate={{ opacity: 1, filter: 'blur(0px)' }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
               style={{ position: 'relative', zIndex: 10, overflowX: 'hidden' }}
             >
