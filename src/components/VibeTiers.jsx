@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Droplet, Zap, Flame, Sparkles, Wind, Moon } from 'lucide-react';
 
-// Disk is on the LEFT (x=-7.8) for this section → cards go on the RIGHT
 const vibes = [
   { genre: 'Emotional', icon: Droplet, accent: '#5b8af0', chipBg: 'rgba(91,138,240,0.18)', border: 'rgba(91,138,240,0.4)', solid: '#0f1835', desc: 'Orchestral depth and sentimental resonance. Swooping strings, piano, cinematic swells.', tags: ['Orchestral', 'Cinematic'] },
   { genre: 'Melancholic', icon: Moon, accent: '#9b63dd', chipBg: 'rgba(155,99,221,0.18)', border: 'rgba(155,99,221,0.4)', solid: '#130f22', desc: 'Slow, introspective frequencies for grief and quiet beauty.', tags: ['Lo-fi', 'Dark'] },
@@ -14,16 +13,28 @@ const vibes = [
 
 export default function VibeTiers({ onThemeChange }) {
   const [hovered, setHovered] = useState(null);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   return (
     <section className="responsive-tier-section" style={{
-      height: '100vh', padding: '0 5vw',
-      display: 'flex', alignItems: 'center',
-      position: 'relative', gap: '5vw',
+      minHeight: '100vh',
+      padding: isMobile ? '8vh 5vw' : '0 5vw',
+      display: 'flex',
+      alignItems: isMobile ? 'flex-start' : 'center',
+      flexDirection: isMobile ? 'column' : 'row',
+      position: 'relative',
+      gap: '5vw',
     }}>
-      {/* LEFT — cards */}
-      <div className="responsive-tier-cards" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.6rem', zIndex: 10 }}>
-        {/* Section label */}
+      { }
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.6rem', zIndex: 10, width: '100%' }}>
+
+        { }
         <div>
           <p style={{ margin: 0, fontSize: '0.68rem', letterSpacing: '0.22em', color: 'rgba(255,255,255,0.38)', fontFamily: "'DM Sans', sans-serif", textTransform: 'uppercase', fontWeight: 500 }}>
             02 — Music Mood
@@ -33,61 +44,71 @@ export default function VibeTiers({ onThemeChange }) {
           </h2>
         </div>
 
-        {/* 3 × 2 Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.95rem' }}>
+        { }
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+          gap: '0.95rem',
+        }}>
           {vibes.map((v, i) => {
             const Icon = v.icon;
             const isHov = hovered === i;
             return (
               <motion.div
                 key={i}
-                className="tier-card"
-                initial={{ opacity: 0, scale: 0.8, y: 30 }}
+                initial={{ opacity: 0, scale: isMobile ? 0.95 : 0.8, y: isMobile ? 15 : 30 }}
                 whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ type: "spring", stiffness: 120, damping: 14, delay: i * 0.08 }}
+                viewport={{ once: true, margin: isMobile ? "0px" : "-50px" }}
+                transition={{ type: isMobile ? 'tween' : 'spring', stiffness: 120, damping: 14, duration: isMobile ? 0.4 : undefined, delay: isMobile ? i * 0.04 : i * 0.08 }}
                 onHoverStart={() => setHovered(i)}
                 onHoverEnd={() => setHovered(null)}
-                whileHover={{ y: -8, scale: 1.03, rotateX: 3, rotateY: -3 }}
+                whileHover={{ y: -8, scale: 1.03 }}
                 whileTap={{ scale: 0.96 }}
                 style={{
                   border: `1px solid ${isHov ? v.border.replace('0.4', '0.75') : v.border}`,
                   borderRadius: '16px',
+                  padding: isMobile ? '0.85rem 0.8rem' : '1.1rem',
                   cursor: 'pointer',
-                  transition: 'border 0.3s ease',
-                  display: 'flex', flexDirection: 'column', gap: '0.9rem',
+                  background: isMobile ? `linear-gradient(135deg, ${v.solid}f2, rgba(10,10,20,0.90))` : `linear-gradient(135deg, ${v.solid}cc, rgba(10,10,20,0.55))`,
+                  backdropFilter: isMobile ? 'blur(28px)' : 'blur(14px)',
+                  WebkitBackdropFilter: isMobile ? 'blur(28px)' : 'blur(14px)',
+                  display: 'flex', flexDirection: 'column', gap: '0.7rem',
                   position: 'relative', overflow: 'hidden',
+                  transition: 'border 0.3s ease',
+                  transform: 'translateZ(0)',
+                  willChange: 'transform, opacity',
                 }}
               >
-                {/* Top accent bar */}
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: `linear-gradient(90deg, ${v.accent}, transparent)`, opacity: isHov ? 1 : 0.5, transition: 'opacity 0.3s' }} />
-                {/* Glow blob */}
-                <div style={{ position: 'absolute', top: -40, right: -40, width: '110px', height: '110px', background: `radial-gradient(circle, ${v.chipBg.replace('0.18', isHov ? '0.55' : '0.3')}, transparent 70%)`, pointerEvents: 'none', transition: 'all 0.4s ease' }} />
+                { }
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: `linear-gradient(90deg, ${v.accent}, transparent)`, opacity: isHov ? 1 : 0.5 }} />
+                { }
+                <div style={{ position: 'absolute', top: -40, right: -40, width: '110px', height: '110px', background: `radial-gradient(circle, ${v.chipBg.replace('0.18', isHov ? '0.55' : '0.3')}, transparent 70%)`, pointerEvents: 'none' }} />
 
-                {/* Icon row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', zIndex: 1 }}>
+                { }
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', zIndex: 1 }}>
                   <motion.div
-                    className="tier-icon"
                     animate={isHov ? { rotate: 360 } : { rotate: 0 }}
                     transition={{ duration: 0.6, ease: 'easeInOut' }}
-                    style={{ width: '38px', height: '38px', borderRadius: '10px', background: v.chipBg, border: `1px solid ${v.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                    style={{ width: isMobile ? '30px' : '38px', height: isMobile ? '30px' : '38px', borderRadius: '10px', background: v.chipBg, border: `1px solid ${v.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                   >
-                    <Icon size={17} color={v.accent} strokeWidth={2} />
+                    <Icon size={isMobile ? 14 : 17} color={v.accent} strokeWidth={2} />
                   </motion.div>
-                  <span className="tier-title" style={{ fontSize: '0.95rem', fontFamily: "'Outfit', sans-serif", fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>
+                  <span style={{ fontSize: isMobile ? '0.78rem' : '0.95rem', fontFamily: "'Outfit', sans-serif", fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>
                     {v.genre}
                   </span>
                 </div>
 
-                {/* Description */}
-                <p style={{ margin: 0, fontSize: '0.76rem', fontFamily: "'DM Sans', sans-serif", fontWeight: 400, color: 'rgba(255,255,255,0.62)', lineHeight: 1.55, zIndex: 1 }}>
-                  {v.desc}
-                </p>
+                { }
+                {!isMobile && (
+                  <p style={{ margin: 0, fontSize: '0.76rem', fontFamily: "'DM Sans', sans-serif", color: 'rgba(255,255,255,0.62)', lineHeight: 1.55, zIndex: 1 }}>
+                    {v.desc}
+                  </p>
+                )}
 
-                {/* Tags */}
-                <div style={{ display: 'flex', gap: '6px', zIndex: 1 }}>
+                { }
+                <div style={{ display: 'flex', gap: '5px', zIndex: 1, flexWrap: 'wrap' }}>
                   {v.tags.map((t, ti) => (
-                    <span key={ti} style={{ fontSize: '0.62rem', padding: '3px 10px', borderRadius: '20px', background: v.chipBg, color: v.accent, border: `1px solid ${v.border}`, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, letterSpacing: '0.04em' }}>
+                    <span key={ti} style={{ fontSize: isMobile ? '0.72rem' : '0.68rem', padding: '3px 10px', borderRadius: '20px', background: v.chipBg, color: v.accent, border: `1px solid ${v.border}`, fontFamily: "'DM Sans', sans-serif", fontWeight: 700, letterSpacing: '0.04em' }}>
                       {t}
                     </span>
                   ))}
@@ -97,8 +118,9 @@ export default function VibeTiers({ onThemeChange }) {
           })}
         </div>
       </div>
-      {/* RIGHT SPACER — disk lives here */}
-      <div className="tier-spacer" style={{ flex: '0 0 46%' }} />
+
+      { }
+      {!isMobile && <div style={{ flex: '0 0 46%' }} />}
     </section>
   );
 }

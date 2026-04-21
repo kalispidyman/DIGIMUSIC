@@ -1,8 +1,4 @@
-/**
- * GlassOverlay — A thin atmospheric tint layer over the animated canvas.
- * Keeps the UI content readable while letting the moving background breathe.
- * The volumetric light bars react to the current Vibe theme color.
- */
+
 export default function GlassOverlay({ themeColor = '#9b4dca' }) {
   const r = parseInt(themeColor.slice(1, 3), 16);
   const g = parseInt(themeColor.slice(3, 5), 16);
@@ -16,11 +12,10 @@ export default function GlassOverlay({ themeColor = '#9b4dca' }) {
         zIndex: 2,
         pointerEvents: 'none',
         overflow: 'hidden',
-        // Very subtle tint — just enough to lift readability, not block the canvas
         background: 'rgba(3, 2, 12, 0.22)',
       }}
     >
-      {/* Volumetric light shafts that pulse with the vibe theme */}
+      {}
       <div style={{
         position: 'absolute', top: 0, left: '18%', width: '14vw', height: '100%',
         background: `linear-gradient(to right, transparent, rgba(${r},${g},${b},0.12), transparent)`,

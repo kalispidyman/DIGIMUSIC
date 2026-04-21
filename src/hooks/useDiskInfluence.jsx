@@ -51,20 +51,20 @@ export function useDiskInfluence(options = {}) {
 
     // GPU compositing hint
     el.style.willChange = 'transform';
-    
+
     // PERFORMANCE FIX: Cache absolute document coordinates to prevent Layout Thrashing.
     // Querying getBoundingClientRect() 60fps causes severe scroll jitter.
     const updateCache = () => {
       const currentTransform = el.style.transform;
       el.style.transform = 'none'; // Temporarily clear transform to get true box
-      
+
       const rect = el.getBoundingClientRect();
       cachedRect.current = {
         absoluteCX: rect.left + window.scrollX + rect.width * 0.5,
         absoluteCY: rect.top + window.scrollY + rect.height * 0.5,
         radius: Math.max(rect.width, rect.height) * 0.3
       };
-      
+
       el.style.transform = currentTransform; // Restore instantly
     };
 

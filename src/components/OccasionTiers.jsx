@@ -38,12 +38,12 @@ export default function OccasionTiers() {
       display: 'flex', alignItems: 'center',
       position: 'relative', gap: '5vw',
     }}>
-      {/* LEFT SPACER — disk lives here */}
+      {}
       <div className="tier-spacer" style={{ flex: '0 0 46%' }} />
 
-      {/* RIGHT — cards */}
+      {}
       <div className="responsive-tier-cards" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.6rem', zIndex: 10 }}>
-        {/* Section label */}
+        {}
         <div>
           <p style={{ margin: 0, fontSize: '0.68rem', letterSpacing: '0.22em', color: 'rgba(255,255,255,0.38)', fontFamily: "'DM Sans', sans-serif", textTransform: 'uppercase', fontWeight: 500 }}>
             01 — Use Case
@@ -53,7 +53,7 @@ export default function OccasionTiers() {
           </h2>
         </div>
 
-        {/* 2 × 2 grid */}
+        {}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.95rem' }}>
           {occasions.map((occ, i) => {
             const Icon = occ.icon;
@@ -80,10 +80,10 @@ export default function OccasionTiers() {
                   position: 'relative', overflow: 'hidden',
                 }}
               >
-                {/* Glow blob */}
+                {}
                 <div style={{ position: 'absolute', bottom: -40, right: -40, width: '130px', height: '130px', background: `radial-gradient(circle, ${occ.chipBg.replace('0.18', isHov ? '0.6' : '0.3')}, transparent 70%)`, pointerEvents: 'none', transition: 'all 0.4s ease' }} />
 
-                {/* Icon + title + chevron */}
+                {}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <div className="tier-icon" style={{ width: '40px', height: '40px', borderRadius: '11px', background: occ.chipBg, border: `1px solid ${occ.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -98,7 +98,7 @@ export default function OccasionTiers() {
                   </motion.div>
                 </div>
 
-                {/* Description */}
+                {}
                 <p style={{
                   margin: 0, fontSize: '0.83rem',
                   fontFamily: "'DM Sans', sans-serif", fontWeight: 400,
@@ -107,10 +107,10 @@ export default function OccasionTiers() {
                   {occ.desc}
                 </p>
 
-                {/* Thin divider */}
+                {}
                 <div style={{ height: '1px', background: occ.border, zIndex: 1 }} />
 
-                {/* Examples — clean dot-list, big and readable */}
+                {}
                 <div style={{ zIndex: 1 }}>
                   <p style={{
                     margin: '0 0 8px',
@@ -123,7 +123,7 @@ export default function OccasionTiers() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', rowGap: '7px', columnGap: '8px' }}>
                     {occ.examples.map((ex, ei) => (
                       <div key={ei} style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-                        {/* Colored dot */}
+                        {}
                         <div style={{
                           width: '7px', height: '7px', borderRadius: '50%',
                           background: occ.accent, flexShrink: 0, opacity: 0.85,
@@ -147,7 +147,6 @@ export default function OccasionTiers() {
           })}
         </div>
       </div>
-
 
     </section>
   );

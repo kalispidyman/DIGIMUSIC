@@ -4,18 +4,17 @@ import { PlayCircle, PauseCircle, Volume2, VolumeX, SlidersHorizontal, SkipBack,
 import { Influenced } from '../hooks/useDiskInfluence';
 import { diskState } from '../systems/diskPosition';
 
-// ── Interactive Studio Components ──
-
-function StudioEqualizer({ barCount = 12, isPlaying }) {
+function StudioEqualizer({ barCount = 12, isPlaying, isMobile }) {
+  const count = isMobile ? 5 : barCount;
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '45px' }}>
-      {Array.from({ length: barCount }).map((_, i) => {
-        const base = 25 + Math.random() * 75;
+      {Array.from({ length: count }).map((_, i) => {
+        const base = 25 + (i * 13 % 75);
         return (
           <motion.div
             key={i}
-            animate={isPlaying ? { height: [`${base * 0.2}%`, `${base}%`, `${base * 0.4}%`, `${base * 0.8}%`, `${base * 0.2}%`] } : { height: '10%' }}
-            transition={{ duration: 0.5 + Math.random() * 1.2, repeat: Infinity, ease: 'easeInOut', delay: i * 0.05 }}
+            animate={isPlaying ? { height: [`${base * 0.2}%`, `${base}%`, `${base * 0.2}%`] } : { height: '10%' }}
+            transition={{ duration: isMobile ? 1.2 : (0.5 + (i * 0.12)), repeat: Infinity, ease: 'easeInOut', delay: i * 0.08 }}
             style={{
               width: '4px',
               borderRadius: '2px',
@@ -52,8 +51,6 @@ function LevelMeter({ isPlaying }) {
   );
 }
 
-// ── Hero Component ──
-
 export default function Hero() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
@@ -61,21 +58,18 @@ export default function Hero() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
 
-  // Start disk spinning immediately on mount
   useEffect(() => { diskState.isPlaying = true; }, []);
 
   const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
 
-  // Parallax effects (disabled natively on mobile wrapper)
   const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
 
-  // Toggle play and sync to disk spin
   const togglePlay = () => {
     const next = !isPlaying;
     setIsPlaying(next);
-    diskState.isPlaying = next; // ← drives the vinyl disk spin speed
+    diskState.isPlaying = next;
   };
 
   return (
@@ -89,7 +83,7 @@ export default function Hero() {
         overflow: 'hidden', zIndex: 10, background: 'transparent',
       }}
     >
-      {/* Cinematic noise overlay */}
+      {}
       <div style={{ position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none', opacity: 0.04, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
 
       <motion.div
@@ -101,7 +95,7 @@ export default function Hero() {
           willChange: 'transform, opacity'
         }}
       >
-        {/* Superior typography label */}
+        {}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -122,11 +116,11 @@ export default function Hero() {
           <span style={{ color: '#ffffff', fontWeight: 800, textShadow: '0 4px 20px rgba(0,0,0,0.9), 0 0 50px rgba(0,0,0,1)' }}>Interactive Audio</span>
         </motion.div>
 
-        {/* Elegant Title Lockup */}
+        {}
         <Influenced influenceRadius={350} maxDisplacement={18} intensity={0.5} scaleEffect={0} rotationEffect={0.3}>
           <div className="hero-title-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: '0 0 1.5rem 0', position: 'relative' }}>
 
-            {/* Deep Contrast Aura — Isolates text from background perfectly */}
+            {}
             <div style={{
               position: 'absolute',
               inset: '-40px -100px -40px -60px',
@@ -144,7 +138,7 @@ export default function Hero() {
               style={{
                 fontFamily: "'Montserrat', sans-serif",
                 fontStyle: 'italic',
-                fontSize: 'clamp(4rem, 15vw, 10rem)', // Increased size
+                fontSize: 'clamp(4rem, 15vw, 10rem)',
                 fontWeight: 900, lineHeight: 1, margin: 0,
                 letterSpacing: '-0.04em', textTransform: 'uppercase',
                 display: 'flex',
@@ -152,7 +146,6 @@ export default function Hero() {
             >
               {'ORIGIN'.split('').map((letter, i) => (
                 <span key={i} style={{
-                  // Each letter gets a different hue stop — creates spectrum cascade
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -169,8 +162,8 @@ export default function Hero() {
                     : 'none',
                   animationDelay: `${i * -0.42}s`,
                   display: 'inline-block',
-                  paddingRight: '0.18em',  // Fixes italic crop clipping gracefully!
-                  marginRight: '-0.18em',  // Compresses the spacer so layout spacing doesn't break
+                  paddingRight: '0.18em',
+                  marginRight: '-0.18em',
                 }}>{letter}</span>
               ))}
             </motion.h1>
@@ -196,7 +189,7 @@ export default function Hero() {
           </div>
         </Influenced>
 
-        {/* Clean Subtitle */}
+        {}
         <motion.h2
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -210,96 +203,111 @@ export default function Hero() {
             letterSpacing: '0.15em',
             maxWidth: '650px',
             lineHeight: 1.7,
-            textShadow: '0 5px 25px rgba(0,0,0,1), 0 0 60px rgba(0,0,0,1)'
+            textShadow: '0 5px 25px rgba(0,0,0,1), 0 0 60px rgba(0,0,0,1)',
+            filter: 'drop-shadow(0 10px 40px rgba(0,0,0,1))'
           }}
         >
           Premium Music Production Hub. Crafting state-of-the-art auditory experiences.
         </motion.h2>
 
-        {/* ── INTERACTIVE STUDIO DASHBOARD (original style) ── */}
+        {}
         <motion.div
           className="hero-panel"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 1.1, ease: [0.16, 1, 0.3, 1] }}
           style={{
-            marginTop: '3.5rem',
+            marginTop: '4rem',
             display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
             alignItems: 'center',
-            gap: '30px',
-            background: 'rgba(10, 10, 12, 0.6)',
+            gap: isMobile ? '16px' : '30px',
+            background: isMobile ? 'rgba(25, 25, 30, 0.4)' : 'rgba(10, 10, 12, 0.6)',
             border: '1px solid rgba(255,255,255,0.08)',
-            padding: '20px 30px',
-            borderRadius: '100px',
-            backdropFilter: 'blur(16px)',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+            padding: isMobile ? '20px' : '20px 30px',
+            borderRadius: isMobile ? '32px' : '100px',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            boxShadow: '0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
+            width: isMobile ? '88%' : 'auto',
+            maxWidth: isMobile ? '340px' : 'none',
           }}
         >
-          {/* Audio Visualization */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <StudioEqualizer barCount={10} isPlaying={isPlaying && !isMuted} />
-            <div style={{ width: '1px', height: '30px', background: 'rgba(255,255,255,0.1)' }} />
+          {}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'space-between' : 'flex-start', gap: '20px', width: isMobile ? '100%' : 'auto' }}>
+            <StudioEqualizer barCount={isMobile ? 12 : 10} isPlaying={isPlaying && !isMuted} isMobile={isMobile} />
             <LevelMeter isPlaying={isPlaying && !isMuted} />
           </div>
 
-          <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.1)', display: 'none' /* hidden on mobile via flex-wrap naturally */ }} />
+          {!isMobile && (
+            <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.1)' }} />
+          )}
+          {isMobile && (
+            <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.05)', margin: '4px 0' }} />
+          )}
 
-          {/* Controls */}
-          <div className="hero-controls-wrap" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <motion.div
-              onClick={() => setIsMuted(!isMuted)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              style={{ cursor: 'pointer', display: 'flex' }}
-            >
-              {isMuted ? <VolumeX size={20} color="rgba(255,255,255,0.6)" strokeWidth={1.5} /> : <Volume2 size={20} color="rgba(255,255,255,0.6)" strokeWidth={1.5} />}
+          {}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'space-between' : 'flex-start', gap: '15px', width: isMobile ? '100%' : 'auto' }}>
+            {}
+            <motion.div onClick={() => setIsMuted(!isMuted)} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} style={{ cursor: 'pointer', display: 'flex' }}>
+              {isMuted ? <VolumeX size={isMobile ? 22 : 20} color="rgba(255,255,255,0.8)" strokeWidth={1.5} /> : <Volume2 size={isMobile ? 22 : 20} color="rgba(255,255,255,0.8)" strokeWidth={1.5} />}
             </motion.div>
 
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} style={{ cursor: 'pointer', display: 'flex' }}>
-              <SkipBack size={20} color="rgba(255,255,255,0.6)" strokeWidth={1.5} />
-            </motion.div>
+            <div style={{ display: 'flex', gap: isMobile ? '24px' : '15px', alignItems: 'center' }}>
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} style={{ cursor: 'pointer', display: 'flex' }}>
+                <SkipBack size={20} color="rgba(255,255,255,0.6)" strokeWidth={1.5} />
+              </motion.div>
 
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} style={{ cursor: 'pointer', display: 'flex' }}>
-              <SkipForward size={20} color="rgba(255,255,255,0.6)" strokeWidth={1.5} />
-            </motion.div>
+              {}
+              <motion.button
+                onClick={togglePlay}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  background: isPlaying ? 'rgba(255,255,255,0.15)' : '#ffffff',
+                  color: isPlaying ? '#fff' : '#000000',
+                  border: isPlaying ? '1px solid rgba(255,255,255,0.3)' : 'none',
+                  padding: isMobile ? '12px' : '12px 20px',
+                  borderRadius: '50px',
+                  fontFamily: "'Syncopate', sans-serif",
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: isPlaying ? 'none' : '0 0 20px rgba(255,255,255,0.2)',
+                  outline: 'none',
+                  transition: 'background 0.3s, color 0.3s',
+                }}
+              >
+                {isPlaying ? <PauseCircle size={isMobile ? 24 : 18} strokeWidth={isMobile ? 1.5 : 2} /> : <PlayCircle size={isMobile ? 24 : 18} strokeWidth={isMobile ? 1.5 : 2} />}
+                {!isMobile && (isPlaying ? 'PAUSE' : 'ENGAGE')}
+              </motion.button>
 
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} style={{ cursor: 'pointer', display: 'flex' }}>
-              <SlidersHorizontal size={20} color="rgba(255,255,255,0.6)" strokeWidth={1.5} />
-            </motion.div>
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} style={{ cursor: 'pointer', display: 'flex' }}>
+                <SkipForward size={20} color="rgba(255,255,255,0.6)" strokeWidth={1.5} />
+              </motion.div>
+              {!isMobile && (
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} style={{ cursor: 'pointer', display: 'flex', marginLeft: '10px' }}>
+                  <SlidersHorizontal size={20} color="rgba(255,255,255,0.6)" strokeWidth={1.5} />
+                </motion.div>
+              )}
+            </div>
 
-            {/* Master Action — now linked to disk spin */}
-            <motion.button
-              onClick={togglePlay}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              style={{
-                background: isPlaying ? '#222' : '#ffffff',
-                color: isPlaying ? '#fff' : '#000000',
-                border: isPlaying ? '1px solid rgba(255,255,255,0.3)' : 'none',
-                padding: '12px 20px',
-                borderRadius: '50px',
-                fontFamily: "'Syncopate', sans-serif",
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                boxShadow: isPlaying ? 'none' : '0 0 20px rgba(255,255,255,0.2)',
-                marginLeft: '10px',
-                outline: 'none',
-              }}
-            >
-              {isPlaying ? <PauseCircle size={18} strokeWidth={2} /> : <PlayCircle size={18} strokeWidth={2} />}
-              {isPlaying ? 'PAUSE' : 'ENGAGE'}
-            </motion.button>
+            {isMobile && (
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} style={{ cursor: 'pointer', display: 'flex' }}>
+                <SlidersHorizontal size={22} color="rgba(255,255,255,0.8)" strokeWidth={1.5} />
+              </motion.div>
+            )}
           </div>
         </motion.div>
       </motion.div>
 
-      {/* Scroll indicator */}
+      {}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.4 }}
@@ -316,11 +324,7 @@ export default function Hero() {
       </motion.div>
 
       <style>{`
-        /*
-         * cascade — sweeps the background-position left-to-right.
-         * Each letter has a different animationDelay so they hit
-         * different gradient stops at the same moment = chromatic cascade.
-         */
+        
         @keyframes cascade {
           0%   { background-position: 100% 50%; }
           100% { background-position:   0% 50%; }

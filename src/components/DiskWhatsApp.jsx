@@ -2,12 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, MessageCircle, Mic, ArrowRight } from 'lucide-react';
 
-/* ─────────────────────────────────────────────────────
-   FORM SIZE CONFIG — tweak these values:
-   W  →  form width in px
-   ───────────────────────────────────────────────── */
 const CONFIG = {
-  w: 900,    // Significantly wider
+  w: 900,
   accent: '#25d366'
 };
 
@@ -43,11 +39,11 @@ export default function DiskWhatsApp() {
           maxWidth: '92vw'
         }}
       >
-        {/* ── Main Content Container ── */}
+        {}
         <div className="wa-form-container" style={{
           position: 'relative',
           zIndex: 1,
-          background: '#07070c', // Purely opaque
+          background: '#07070c',
           backdropFilter: 'none',
           borderRadius: '24px',
           padding: '3rem',
@@ -58,7 +54,7 @@ export default function DiskWhatsApp() {
           boxShadow: '0 40px 100px rgba(0,0,0,0.8)'
         }}>
           
-          {/* Header */}
+          {}
           <div className="wa-form-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <div style={{
@@ -74,7 +70,7 @@ export default function DiskWhatsApp() {
               </div>
             </div>
 
-            {/* Visualizer Decoration */}
+            {}
             <div style={{ display: 'flex', gap: '4px', alignItems: 'flex-end', height: '22px' }}>
               {[1,2,3,4,5,6].map(i => (
                 <motion.div
@@ -105,7 +101,7 @@ export default function DiskWhatsApp() {
                 onSubmit={onSend}
                 style={{ display: 'flex', gap: '1.2rem', alignItems: 'flex-end' }}
               >
-                {/* Name */}
+                {}
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Identity</label>
                   <div style={{ position: 'relative' }}>
@@ -129,7 +125,7 @@ export default function DiskWhatsApp() {
                   </div>
                 </div>
 
-                {/* Message */}
+                {}
                 <div style={{ flex: 2 }}>
                   <label style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Your Vibe</label>
                   <div style={{ position: 'relative' }}>
@@ -153,7 +149,7 @@ export default function DiskWhatsApp() {
                   </div>
                 </div>
 
-                {/* Submit */}
+                {}
                 <motion.button
                   className="wa-form-button"
                   whileHover={{ scale: 1.05, background: CONFIG.accent, color: '#000' }}

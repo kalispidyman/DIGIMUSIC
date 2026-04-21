@@ -13,9 +13,7 @@ export default function Loader({ onComplete }) {
       if (current >= 100) {
         current = 100;
         clearInterval(interval);
-        // Begin the smooth fade-out sequence
         setFinishing(true);
-        // Wait for the exit animation to complete before unmounting
         setTimeout(onComplete, 1400);
       }
       setPercent(current);
